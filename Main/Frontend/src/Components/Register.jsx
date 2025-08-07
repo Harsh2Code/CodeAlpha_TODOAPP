@@ -1,39 +1,65 @@
-import React, { useState } from 'react'
-import {Link, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { RegisterUser } from '../redux/authSlice'
 
 function Register() {
-    const [formDAta, setFormData] = useState({
+    const [formData, setFormData] = useState({
         username: '',
         password: '',
         email: '',
-        role: 'user'
+        role: 'Member'
     });
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { loading, error } = useSelector((state) => state.auth || {});
+    const [message, setMessage] = useState(null);
+    const [success, setSuccess] = useState(false);
+    const timerRef = useRef(null);
+
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+            }
+        };
+    }, []);
 
     const handleChange = (e) => {
-        const {name, value} = e.target;
-        setFormData( prev => ({
+        const { name, value } = e.target;
+        setFormData(prev => ({
             ...prev,
             [name]: value
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        dispatch(register(formDAta))
-        .unwrap()
-        .then((data) => {
-            if(data?.success) {
-                console.log('register form data created and sending...');
+        try {
+            const result = await dispatch(RegisterUser(formData)).unwrap();
+            if (result.success) {
                 navigate('/login');
             }
-        })
-        .catch((error) => {
-            console.log('error while creating data at registration page!')
-        })
+        } catch (err) {
+            // Error handled by Redux state
+        }
     }
+
+    const roles = [
+        { value: 'Member', label: 'Member', description: 'Regular team member', color: 'blue' },
+        { value: 'Chief', label: 'Chief', description: 'Team leader', color: 'green' },
+        { value: 'Admin', label: 'Admin', description: 'System administrator', color: 'red' }
+    ];
+
+    const getRoleColorClass = (color) => {
+        const colors = {
+            blue: 'border-blue-500 bg-blue-900/20',
+            green: 'border-green-500 bg-green-900/20',
+            red: 'border-red-500 bg-red-900/20'
+        };
+        return colors[color] || 'border-gray-500 bg-gray-900/20';
+    };
 
     return (
         <div>
@@ -45,6 +71,12 @@ function Register() {
                             <p className="text-gray-400 mt-2">Create your account</p>
                         </div>
 
+                        {message && !error && (
+                            <div className={`mb-4 p-3 rounded-lg ${success ? 'bg-green-900/50 border border-green-700' : 'bg-blue-900/50 border border-blue-700'}`}>
+                                <p className={`${success ? 'text-green-400' : 'text-blue-400'} text-sm`}>{message}</p>
+                            </div>
+                        )}
+
                         {error && (
                             <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg">
                                 <p className="text-red-400 text-sm">{error}</p>
@@ -54,15 +86,16 @@ function Register() {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Full Name
+                                    Username
                                 </label>
                                 <input
                                     type="text"
+                                    name="username"
                                     required
-                                    value={formData.fullName}
-                                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                    value={formData.username}
+                                    onChange={handleChange}
                                     className="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
-                                    placeholder="Enter your full name"
+                                    placeholder="Enter your username"
                                 />
                             </div>
 
@@ -72,9 +105,10 @@ function Register() {
                                 </label>
                                 <input
                                     type="email"
+                                    name="email"
                                     required
                                     value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    onChange={handleChange}
                                     className="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
                                     placeholder="Enter your email"
                                 />
@@ -86,25 +120,12 @@ function Register() {
                                 </label>
                                 <input
                                     type="password"
+                                    name="password"
                                     required
                                     value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    onChange={handleChange}
                                     className="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
                                     placeholder="Enter your password"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Confirm Password
-                                </label>
-                                <input
-                                    type="password"
-                                    required
-                                    value={formData.confirmPassword}
-                                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                    className="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
-                                    placeholder="Confirm your password"
                                 />
                             </div>
 
@@ -127,15 +148,15 @@ function Register() {
                                                     name="role"
                                                     value={role.value}
                                                     checked={formData.role === role.value}
-                                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                                    onChange={handleChange}
                                                     className="sr-only"
                                                 />
                                                 <div className="flex-1">
                                                     <div className="flex items-center justify-between">
                                                         <span className="text-white font-medium">{role.label}</span>
-                                                        <div className={`w-3 h-3 rounded-full ${role.color === 'gray' ? 'bg-gray-400' :
+                                                        <div className={`w-3 h-3 rounded-full ${role.color === 'blue' ? 'bg-blue-400' :
                                                                 role.color === 'green' ? 'bg-green-400' :
-                                                                    role.color === 'blue' ? 'bg-blue-400' : 'bg-red-400'
+                                                                    'bg-red-400'
                                                             }`}></div>
                                                     </div>
                                                     <p className="text-gray-400 text-sm mt-1">{role.description}</p>
@@ -158,7 +179,7 @@ function Register() {
                         <div className="mt-6 text-center">
                             <p className="text-gray-400">
                                 Already have an account?{' '}
-                                <Link href="/login" className="text-blue-400 hover:text-blue-300 transition-colors">
+                                <Link to="/login" className="text-blue-400 hover:text-blue-300 transition-colors">
                                     Sign in
                                 </Link>
                             </p>
