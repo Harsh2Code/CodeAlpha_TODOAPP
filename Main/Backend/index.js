@@ -1,17 +1,25 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-
-dotenv.config();
+const cors = require('cors');
+const config = require('./config/config');
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3001;
 
+// Configure CORS
+const corsOptions = {
+  origin: ['http://localhost:5173', 'http://localhost:3001'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+mongoose.connect(config.mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch(err => console.log('MongoDB connection error:', err));
 
 const authRoutes = require('./routers/auth/auth-routes');
 

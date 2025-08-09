@@ -25,6 +25,11 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
+  if (!process.env.JWT_SECRET) {
+    console.error('JWT_SECRET is not defined in your environment variables');
+    return res.status(500).json({ error: 'Server configuration error: JWT_SECRET is missing.' });
+  }
+
   const { email, password } = req.body; // Changed from username to email
   console.log('Login attempt for email:', email);
   try {
@@ -40,11 +45,23 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
     console.log('Password matched. Generating token...');
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const userObject = user.toObject();
+    const userId = userObject._id.toString();
+    const userRole = userObject.role || 'Member';
+    const token = jwt.sign({ id: userId, role: userRole }, process.env.JWT_SECRET, { expiresIn: '1h' });
     console.log('Login successful for email:', email);
-    res.json({ token, user: { id: user._id, role: user.role } }); // Added user role to response
+    res.json({ token, user: { id: userId, role: userRole } }); // Added user role to response
   } catch (error) {
-    console.error('Error during login:', error);
+    console.error('Detailed error during login:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.status(200).json(users);
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };

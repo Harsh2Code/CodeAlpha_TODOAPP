@@ -9,15 +9,19 @@ import Todos from './Components/Todos'
 import Teams from './Components/Teams'
 import Admin from './Components/Admin'
 import NotFound from './Components/notFound'
+import ChiefDashboard from './Components/ChiefDashboard'
+import MemberDashboard from './Components/MemberDashboard'
 
 function App() {
   return (
     <>
       <Navbar />
-      <div className="mt-[5rem]">
+      <div className="mt-[1rem]">
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/dashboard" element={<Admin />} />
+          <Route path="/chief/dashboard" element={<ChiefDashboard />} />
+          <Route path="/member/dashboard" element={<MemberDashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/todo" element={<Todos />} />

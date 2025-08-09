@@ -24,7 +24,7 @@ function Navbar() {
         <li><a>Item 3</a></li>
       </ul>
     </div>
-    <a className="btn btn-ghost text-xl">daisyUI</a>
+    <a className="btn btn-ghost text-xl"><img src="/cha-bubbles-two-svgrepo-com.svg" alt="logo" className="w-12" /></a>
   </div>
   <div className="navbar-center hidden lg:flex">
     

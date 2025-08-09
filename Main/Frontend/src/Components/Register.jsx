@@ -48,7 +48,8 @@ function Register() {
 
     const roles = [
         { value: 'Member', label: 'Member', description: 'Regular team member', color: 'blue' },
-        { value: 'Chief', label: 'Chief', description: 'Team leader', color: 'green' },
+        {value: 'Leader', label: 'Leader', description: 'Team leader', color: 'orange'},
+        { value: 'Chief', label: 'Chief', description: 'Team chief', color: 'green' },
         { value: 'Admin', label: 'Admin', description: 'System administrator', color: 'red' }
     ];
 
@@ -56,6 +57,7 @@ function Register() {
         const colors = {
             blue: 'border-blue-500 bg-blue-900/20',
             green: 'border-green-500 bg-green-900/20',
+            orange: 'border-orange-500 bg-orange-900/20',
             red: 'border-red-500 bg-red-900/20'
         };
         return colors[color] || 'border-gray-500 bg-gray-900/20';
@@ -67,7 +69,7 @@ function Register() {
                 <div className="max-w-md w-full mx-4">
                     <div className="bg-gray-800 rounded-lg shadow-lg p-8 border border-gray-700">
                         <div className="text-center mb-8">
-                            <h1 className="text-3xl font-bold text-white font-['Pacifico']">logo</h1>
+                            <img src="/cha-bubbles-two-svgrepo-com.svg" alt="logo" className="w-12 mx-auto" />
                             <p className="text-gray-400 mt-2">Create your account</p>
                         </div>
 
@@ -156,6 +158,7 @@ function Register() {
                                                         <span className="text-white font-medium">{role.label}</span>
                                                         <div className={`w-3 h-3 rounded-full ${role.color === 'blue' ? 'bg-blue-400' :
                                                                 role.color === 'green' ? 'bg-green-400' :
+                                                                role.color === 'orange' ? 'bg-orange-400' :
                                                                     'bg-red-400'
                                                             }`}></div>
                                                     </div>

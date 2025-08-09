@@ -1,22 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginUser } from '../redux/authSlice';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const { loading, error } = useSelector((state) => state.auth);
+  const { loading, error, token, user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (token) {
+      navigate(user?.role === 'Chief' ? '/chief/dashboard' : user?.role === 'Member' ? '/member/dashboard' : user?.role === 'Admin' ? '/admin/dashboard' : '/dashboard');
+    }
+  }, [token, navigate, user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { email, password } = formData;
     try {
-      const result = await dispatch(LoginUser({ email, password })).unwrap();
-      if (result.success) {
-        navigate(result.user?.role === 'chief' ? '/chief/dashboard' : result.user?.role === 'member' ? '/' : '/admin/dashboard');
-      }
+      await dispatch(LoginUser({ email, password })).unwrap();
     } catch (err) {
       // error is handled by the redux state
     }
@@ -28,7 +31,7 @@ export default function Login() {
         <div className="max-w-md w-full mx-4">
           <div className="bg-gray-800 rounded-lg shadow-lg p-8 border border-gray-700">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-white font-['Pacifico']">logo</h1>
+              <img src="/cha-bubbles-two-svgrepo-com.svg" alt="logo" className="w-12 mx-auto" />
               <p className="text-gray-400 mt-2">Sign in to your account</p>
             </div>
 
@@ -71,9 +74,8 @@ export default function Login() {
 
               <button
                 type="submit"
-                name='btn'
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Signing In...' : 'Sign In'}
               </button>
@@ -105,5 +107,4 @@ export default function Login() {
       </div>
     </div>
   );
-
 }
