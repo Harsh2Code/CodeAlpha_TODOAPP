@@ -32,6 +32,10 @@ const projectSchema = new mongoose.Schema({
         type: String,
         enum: ['low', 'medium', 'high'],
         default: 'medium'
+    },
+    team: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Team'
     }
 }, { timestamps: true });
 

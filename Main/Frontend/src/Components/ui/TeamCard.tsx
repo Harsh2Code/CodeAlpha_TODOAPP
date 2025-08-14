@@ -1,4 +1,6 @@
 
+import { Link } from 'react-router-dom';
+
 'use client';
 
 interface Member {
@@ -18,11 +20,14 @@ interface TeamCardProps {
   completedTasks: number;
   color: string;
   onInvite: (teamId: string) => void;
+  onMemberClick: (member: Member) => void;
 }
 
-export default function TeamCard({ 
-  id, name, description, members, activeProjects, completedTasks, color, onInvite 
+export default function TeamCard({
+  id, name, description, members, activeProjects, completedTasks, color, onInvite, onMemberClick
 }: TeamCardProps) {
+  console.log('TeamCard props:', { id, name, description, members, activeProjects, completedTasks, color });
+  console.log('TeamCard members prop:', members);
   const colorClasses = {
     blue: 'bg-blue-900 border-blue-800',
     green: 'bg-green-900 border-green-800',
@@ -39,7 +44,7 @@ export default function TeamCard({
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-700">
+    <Link to={`/teams/${id}`} className="bg-gray-800 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-700">
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center space-x-3 mb-2">
@@ -69,20 +74,26 @@ export default function TeamCard({
           <span className="text-sm text-gray-400">{members.length}</span>
         </div>
         
-        <div className="flex -space-x-2">
-          {members.slice(0, 5).map((member, index) => (
-            <div key={member.id} className="relative">
+        <div className="flex flex-col space-y-2">
+          {members.map((member) => (
+            <div 
+              key={member.id} 
+              className="flex items-center p-2 rounded-lg hover:bg-gray-700 cursor-pointer transition-colors"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent navigating to team details
+                onMemberClick(member);
+              }}
+            >
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm border-2 border-gray-800">
                 {member.avatar}
               </div>
-              <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-gray-800 ${statusColors[member.status]}`}></div>
+              <div className="ml-3">
+                <p className="text-white font-medium">{member.name}</p>
+                <p className="text-gray-400 text-xs">{member.role}</p>
+              </div>
+              <div className={`ml-auto w-3 h-3 rounded-full border-2 border-gray-800 ${statusColors[member.status]}`}></div>
             </div>
           ))}
-          {members.length > 5 && (
-            <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-white font-medium text-xs border-2 border-gray-800">
-              +{members.length - 5}
-            </div>
-          )}
         </div>
       </div>
 
@@ -107,6 +118,6 @@ export default function TeamCard({
           <p className="text-xl font-semibold text-white mt-1">{completedTasks}</p>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

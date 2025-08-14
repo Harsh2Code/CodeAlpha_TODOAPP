@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux';
+import { toast } from 'sonner';
 
 function MemberDashboard() {
     const [data, setData] = useState(null);
     const { token, user } = useSelector((state) => state.auth);
-    const [chiefs, setChiefs] = useState([]);
-    const [selectedChief, setSelectedChief] = useState('');
+    const [chiefEmail, setChiefEmail] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [projects, setProjects] = useState([]);
+    const [chiefTasks, setChiefTasks] = useState([]); // New state for chief tasks
+    const [chiefActivity, setChiefActivity] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -24,19 +26,7 @@ function MemberDashboard() {
             }
         };
 
-        const fetchChiefs = async () => {
-            try {
-                const response = await fetch('/api/chief/all', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                const result = await response.json();
-                setChiefs(result);
-            } catch (error) {
-                console.error('Error fetching chiefs:', error);
-            }
-        };
+        // fetchChiefs function removed as it's no longer needed
 
         const fetchMemberProjects = async () => {
             try {
@@ -46,18 +36,51 @@ function MemberDashboard() {
                     }
                 });
                 const result = await response.json();
-                setProjects(result);
+                setProjects(Array.isArray(result) ? result : []);
             } catch (error) {
                 console.error('Error fetching member projects:', error);
+            }
+        };
+
+        // New fetch function for chief tasks
+        const fetchChiefTasks = async () => {
+            try {
+                const response = await fetch('/api/member/tasks', { // This is the new endpoint
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const result = await response.json();
+                                setChiefTasks(Array.isArray(result.tasks) ? result.tasks : []); // Assuming the backend sends { tasks: [...] }
+            } catch (error) {
+                console.error('Error fetching chief tasks:', error);
+            }
+        };
+
+        const fetchChiefActivity = async () => {
+            try {
+                const response = await fetch('http://localhost:3001/api/member/chief-activity', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    setChiefActivity(result);
+                } else {
+                    console.error('Failed to fetch chief activity:', result.message);
+                }
+            } catch (error) {
+                console.error('Error fetching chief activity:', error);
             }
         };
 
         if (token) {
             fetchData();
             fetchMemberProjects();
-            if (!user?.chief) {
-                fetchChiefs();
-            }
+            fetchChiefTasks(); // Call the new fetch function
+            fetchChiefActivity(); // Call the new fetch function
+            // fetchChiefs is no longer needed as we're using email input
         }
     }, [token, user]);
 
@@ -69,12 +92,15 @@ function MemberDashboard() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ chiefId: selectedChief })
+                body: JSON.stringify({ chiefEmail: chiefEmail })
             });
             const result = await response.json();
             if (response.ok) {
                 setShowModal(false);
+                toast.success('Chief added successfully!');
                 // Optionally, you can refetch the user data to update the UI
+            } else {
+                toast.error('Failed to add chief.');
             }
         } catch (error) {
             console.error('Error updating chief:', error);
@@ -100,17 +126,14 @@ function MemberDashboard() {
                         <h3 className="text-lg font-semibold mb-4 text-white">Add Chief</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Select Chief</label>
-                                <select
-                                    value={selectedChief}
-                                    onChange={(e) => setSelectedChief(e.target.value)}
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Chief Email</label>
+                                <input
+                                    type="email"
+                                    value={chiefEmail}
+                                    onChange={(e) => setChiefEmail(e.target.value)}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
-                                >
-                                    <option value="">Select a Chief</option>
-                                    {chiefs.map((chief) => (
-                                        <option key={chief._id} value={chief._id}>{chief.username}</option>
-                                    ))}
-                                </select>
+                                    placeholder="Enter chief's email"
+                                />
                             </div>
                         </div>
                         <div className="flex justify-end space-x-3 mt-6">
@@ -141,17 +164,19 @@ function MemberDashboard() {
                     <button className="btn btn-soft px-8 p-3 rounded-md mx-2 font-bold">View More</button>
                 </span>
             </div>
-            <div className='grid grid-cols-1 mt-8 md:grid-cols-3 gap-8 pt-8 mb-16 w-5/6 mx-auto'>
-                {data.features.map((feature) => (
-                    <div key={feature.id} className="bg-gray-800 rounded-lg shadow-sm text-center border border-gray-700">
-                        <div className="card-body">
-                            <i className={`ri-${feature.icon}-line text-center text-4xl p-3 px-0 rounded-[50%] mx-auto text-${feature.color}-400 bg-${feature.color}-800 w-[70px]`}></i>
-                            <h2 className="card-title">{feature.title}</h2>
-                            <p className="text-left">{feature.description}</p>
+            {data && data.features && data.features.length > 0 && (
+                <div className='grid grid-cols-1 mt-8 md:grid-cols-3 gap-8 pt-8 mb-16 w-5/6 mx-auto'>
+                    {data.features.map((feature) => (
+                        <div key={feature.id} className="bg-gray-800 rounded-lg shadow-sm text-center border border-gray-700">
+                            <div className="card-body">
+                                <i className={`ri-${feature.icon}-line text-center text-4xl p-3 px-0 rounded-[50%] mx-auto text-${feature.color}-400 bg-${feature.color}-800 w-[70px]`}></i>
+                                <h2 className="card-title">{feature.title}</h2>
+                                <p className="text-left">{feature.description}</p>
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
             <div className="grid grid-cols-1 mt-1 mx-auto md:grid-cols-2 gap-8 w-5/6  mb-[4rem]">
                 <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-5">
                     <h3 className="text-2xl font-semibold text-white mb-4 ">Project Flow Tracking</h3>
@@ -226,6 +251,72 @@ function MemberDashboard() {
                     </ul>
                 )}
             </div>
+
+            {/* New section for Tasks created by Chief */}
+            <div className="my-8">
+                <h2 className="text-xl font-semibold text-white mb-6">Tasks from Chief</h2>
+                {(chiefTasks && chiefTasks.length === 0) ? (
+                    <div className="text-center text-gray-500 bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700 min-h-[10rem] flex items-center justify-center">
+                        <div>
+                            <i className="ri-emotion-normal-line text-4xl"></i>
+                            <p>No tasks from Chief yet.</p>
+                        </div>
+                    </div>
+                ) : (
+                    <ul className="list bg-base-100 rounded-box">
+                        {chiefTasks && chiefTasks.map(task => (
+                            <li key={task._id} className="p-4 border-b border-gray-700 last:border-b-0">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h4 className="font-medium text-white">{task.title}</h4>
+                                        <p className="text-sm text-gray-400">Created by: {task.createdBy.username}</p>
+                                        <p className="text-sm text-gray-400">Assigned to: {task.assignedTo ? task.assignedTo.username : 'Unassigned'}</p>
+                                        <p className="text-sm text-gray-400">Due Date: {new Date(task.dueDate).toLocaleDateString()}</p>
+                                    </div>
+                                    <div className="badge badge-outline">{task.status}</div>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+
+            {chiefActivity && chiefActivity.projects && chiefActivity.tasks && (
+                <div className="my-8">
+                    <h2 className="text-xl font-semibold text-white mb-6">Chief's Recent Activity</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {chiefActivity.projects.length > 0 && (
+                            <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
+                                <h3 className="text-lg font-semibold text-white mb-4">Recent Projects by {chiefActivity.chief.username}</h3>
+                                <ul className="space-y-3">
+                                    {chiefActivity.projects.map(project => (
+                                        <li key={project._id} className="text-gray-400 text-sm">
+                                            <span className="font-medium text-white">{project.name}</span> - Created on {new Date(project.createdAt).toLocaleDateString()}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        {chiefActivity.tasks.length > 0 && (
+                            <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
+                                <h3 className="text-lg font-semibold text-white mb-4">Recent Tasks by {chiefActivity.chief.username}</h3>
+                                <ul className="space-y-3">
+                                    {chiefActivity.tasks.map(task => (
+                                        <li key={task._id} className="text-gray-400 text-sm">
+                                            <span className="font-medium text-white">{task.title}</span> - Assigned to {task.assignedTo ? task.assignedTo.username : 'N/A'} on {new Date(task.createdAt).toLocaleDateString()}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        {chiefActivity.projects.length === 0 && chiefActivity.tasks.length === 0 && (
+                            <div className="text-center text-gray-500 bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700 col-span-full">
+                                <p>No recent activity from your Chief.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

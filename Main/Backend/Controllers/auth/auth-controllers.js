@@ -50,7 +50,7 @@ exports.login = async (req, res) => {
     const userRole = userObject.role || 'Member';
     const token = jwt.sign({ id: userId, role: userRole }, process.env.JWT_SECRET, { expiresIn: '1h' });
     console.log('Login successful for email:', email);
-    res.json({ token, user: { id: userId, role: userRole } }); // Added user role to response
+    res.json({ token, user: { id: userId, role: userRole, chief: user.chief } }); // Added user role and chief to response
   } catch (error) {
     console.error('Detailed error during login:', error);
     res.status(500).json({ error: error.message });
@@ -62,6 +62,19 @@ exports.getAllUsers = async (req, res) => {
     const users = await User.find({});
     res.status(200).json(users);
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate('chief', 'username email');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
     res.status(500).json({ error: error.message });
   }
 };

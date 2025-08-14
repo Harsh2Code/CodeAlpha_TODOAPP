@@ -1,10 +1,11 @@
 const Project = require('../../Models/Projects');
 const Task = require('../../Models/Tasks');
+const mongoose = require('mongoose'); // Import mongoose
 
 exports.createProject = async (req, res) => {
-    const { name, description, priority } = req.body;
+    const { name, description, priority, teamId } = req.body;
     try {
-        const project = new Project({ name, description, priority, chief: req.user.id });
+        const project = new Project({ name, description, priority, chief: req.user.id, team: teamId });
         await project.save();
         res.status(201).json({ success: true, message: 'Project created successfully', project });
     } catch (error) {
@@ -18,8 +19,12 @@ exports.createProject = async (req, res) => {
 
 exports.getProjects = async (req, res) => {
     try {
-        const projects = await Project.find({ chief: req.user.id }).populate('tasks');
-        res.status(200).json(projects);
+        console.log('req.user.id in getProjects:', req.user.id);
+        const projects = await Project.find({ chief: req.user.id });
+        console.log('Raw projects (before team population):', projects);
+        const populatedProjects = await Project.find({ chief: req.user.id }).populate('tasks').populate('team');
+        console.log('Projects fetched (with populated team):', populatedProjects);
+        res.status(200).json(populatedProjects);
     } catch (error) {
         console.error('Error fetching projects:', error);
         res.status(500).json({ 
@@ -31,19 +36,45 @@ exports.getProjects = async (req, res) => {
 
 exports.updateProject = async (req, res) => {
     const { projectId } = req.params;
-    const { name, description, priority, status } = req.body;
+    const { name, description, priority, status, team } = req.body;
     console.log('Received update project request for projectId:', projectId);
     console.log('Request body:', req.body);
+    console.log('Received team ID:', team);
+
+    let teamObjectId = null;
+    if (team) {
+        try {
+            teamObjectId = new mongoose.Types.ObjectId(team);
+            console.log('Casted team ObjectId:', teamObjectId);
+            const existingTeam = await mongoose.model('Team').findById(teamObjectId);
+            console.log('Existing team found:', !!existingTeam);
+        } catch (e) {
+            console.error('Error casting team ID to ObjectId:', e);
+            // If casting fails, treat it as an invalid team ID
+            teamObjectId = null;
+        }
+    }
+
     try {
-        const project = await Project.findByIdAndUpdate(
-            projectId,
-            { name, description, priority, status },
-            { new: true }
-        );
+        const project = await Project.findById(projectId);
+
         if (!project) {
             return res.status(404).json({ message: 'Project not found' });
         }
-        res.status(200).json({ success: true, message: 'Project updated successfully', project });
+
+        // Update fields individually
+        project.name = name;
+        project.description = description;
+        project.priority = priority;
+        project.status = status;
+        project.team = teamObjectId; // Explicitly set the team field
+
+        await project.save(); // Save the updated project
+
+        console.log('Project after update:', project);
+        console.log('Project.team after update:', project.team);
+
+        res.status(200).json({ success: true, message: 'Project updated successfully', project, updatedTeam: project.team });
     } catch (error) {
         console.error('Error updating project:', error);
         res.status(500).json({ 
@@ -110,7 +141,13 @@ exports.completeTask = async (req, res) => {
 exports.getProjectOverview = async (req, res) => {
     const { projectId } = req.params;
     try {
-        const project = await Project.findById(projectId).populate('tasks').populate('chief', 'username');
+        const project = await Project.findById(projectId).populate('tasks').populate('chief', 'username').populate({
+            path: 'team',
+            populate: {
+                path: 'leader',
+                model: 'User'
+            }
+        });
         if (!project) {
             return res.status(404).json({ error: 'Project not found' });
         }

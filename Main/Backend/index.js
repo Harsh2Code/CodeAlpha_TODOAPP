@@ -1,7 +1,13 @@
+require('dotenv').config({ path: './.env.local' });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const config = require('./config/config');
+
+// Explicitly require all models to ensure they are registered with Mongoose
+require('./Models/Users');
+require('./Models/Tasks');
+require('./Models/Projects');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -36,6 +42,15 @@ app.use('/api/admin', adminRoutes);
 const memberRoutes = require('./routers/Member/index.js');
 
 app.use('/api/member', memberRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.statusCode || 500).json({
+    message: err.message || 'An unexpected error occurred',
+    error: process.env.NODE_ENV === 'development' ? err : {},
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

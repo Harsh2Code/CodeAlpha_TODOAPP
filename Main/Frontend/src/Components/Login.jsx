@@ -10,16 +10,36 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (token) {
-      navigate(user?.role === 'Chief' ? '/chief/dashboard' : user?.role === 'Member' ? '/member/dashboard' : user?.role === 'Admin' ? '/admin/dashboard' : '/dashboard');
-    }
-  }, [token, navigate, user]);
+    // This useEffect can be used for other side effects related to user/token changes,
+    // but primary redirection after login is handled in handleSubmit.
+  }, [token, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { email, password } = formData;
     try {
-      await dispatch(LoginUser({ email, password })).unwrap();
+      const resultAction = await dispatch(LoginUser({ email, password })).unwrap();
+      console.log('Login resultAction:', resultAction); // Log the entire resultAction
+      const loggedInUser = resultAction.user; // Assuming the user object is in resultAction.user
+      console.log('loggedInUser:', loggedInUser); // Log loggedInUser
+
+      if (loggedInUser) {
+        console.log('loggedInUser.role:', loggedInUser.role); // Log the role
+        const role = loggedInUser.role?.toLowerCase();
+        if (role === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (role === 'chief') {
+          navigate('/chief/dashboard');
+        } else if (role === 'member') {
+          navigate('/member/dashboard');
+        } else {
+          // Fallback for unexpected roles or if role is missing
+          console.log('Unknown role or role missing, navigating to default dashboard');
+          navigate('/dashboard');
+        }
+      } else {
+        console.log('loggedInUser is null or undefined. Redirection skipped.');
+      }
     } catch (err) {
       // error is handled by the redux state
     }

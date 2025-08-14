@@ -1,12 +1,91 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import Header from './ui/Header';
+import TodoItem from './ui/TodoItem';
+import { useSelector } from 'react-redux';
 
 function Todos() {
+  const [todos, setTodos] = useState([]);
+  const [filter, setFilter] = useState('all');
+  const [showNewTodo, setShowNewTodo] = useState(false);
+  const [newTodo, setNewTodo] = useState({
+    title: '',
+    description: '',
+    priority: 'medium',
+    dueDate: '',
+    assignee: '',
+    project: '',
+    notifications: [],
+  });
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [projects, setProjects] = useState([]);
+
+  const { user } = useSelector((state) => state.auth);
+  const token = user?.token;
+
+  useEffect(() => {
+    const fetchMemberTasks = async () => {
+      if (!token) return;
+      try {
+        const response = await fetch('http://localhost:3001/api/member/tasks', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+        // Assuming the backend returns an object with a 'tasks' array
+        setTodos(result.tasks || []); 
+      } catch (error) {
+        console.error('Error fetching member tasks:', error);
+        setTodos([]);
+      }
+    };
+
+    // Fetch team members and projects (dummy data for now, replace with API calls if needed)
+    setTeamMembers(['John Doe', 'Jane Smith', 'Peter Jones']);
+    setProjects(['Project Alpha', 'Project Beta', 'Project Gamma']);
+
+    fetchMemberTasks();
+  }, [token]);
+
+  const completedCount = todos.filter(todo => todo.completed).length;
+  const pendingCount = todos.filter(todo => !todo.completed).length;
+  const highPriorityCount = todos.filter(todo => todo.priority === 'high' && !todo.completed).length;
+
+  const filteredTodos = todos.filter(todo => {
+    if (filter === 'all') return true;
+    if (filter === 'pending') return !todo.completed;
+    if (filter === 'completed') return todo.completed;
+    if (filter === 'high') return todo.priority === 'high' && !todo.completed;
+    return true;
+  });
+
+  const handleToggleComplete = (id) => {
+    setTodos(todos.map(todo => 
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    ));
+  };
+
+  const handleCreateTodo = () => {
+    // Logic to create a new todo (e.g., send to API)
+    console.log('Creating new todo:', newTodo);
+    setTodos([...todos, { ...newTodo, id: todos.length + 1, completed: false }]);
+    setShowNewTodo(false);
+    setNewTodo({
+      title: '',
+      description: '',
+      priority: 'medium',
+      dueDate: '',
+      assignee: '',
+      project: '',
+      notifications: [],
+    });
+  };
   return (
     <div className="min-h-screen bg-gray-900">
-      <div className="bg-gray-800 border-b border-gray-700">
-        <Header />
-      </div>
-      
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>

@@ -15,14 +15,15 @@ const TasksSchema = new mongoose.Schema(
         ref: 'Project',
         required: true,
     },
-    members: {
-        type: Number,
-        required: true,
-    },
     assignedTo: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     }],
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
     dueDate: {
         type: Date,
     },

@@ -58,6 +58,31 @@ export const RegisterUser = createAsyncThunk(
   }
 );
 
+// New async thunk to update user's chief
+export const updateUserChief = createAsyncThunk(
+  'auth/updateUserChief',
+  async (chiefId, { getState, rejectWithValue }) => {
+    try {
+      const state = getState();
+      const currentUserId = state.auth.user.id;
+      const token = state.auth.token;
+
+      // Make API call to update chief on the backend if necessary,
+      // though this thunk primarily updates the Redux state.
+      // Assuming the backend's updateChief endpoint is called separately.
+      // This thunk is for updating the Redux state after a successful backend update.
+
+      // Return the updated user object with the new chiefId
+      const updatedUser = { ...state.auth.user, chief: chiefId };
+      localStorage.setItem('user', JSON.stringify(updatedUser)); // Update localStorage
+      return updatedUser;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -95,6 +120,11 @@ export const authSlice = createSlice({
       .addCase(RegisterUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // New case for updating user's chief
+      .addCase(updateUserChief.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload; // action.payload is the updated user object
       });
   },
 });

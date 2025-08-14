@@ -1,6 +1,7 @@
 const Team = require('../../Models/Teams');
 const User = require('../../Models/Users');
 const Task = require('../../Models/Tasks');
+const Project = require('../../Models/Projects');
 const mongoose = require('mongoose');
 
 exports.createTeam = async (req, res) => {
@@ -10,10 +11,10 @@ exports.createTeam = async (req, res) => {
     // Ensure members is an array and filter out any invalid entries
     const validMembers = Array.isArray(members) ? members.filter(id => id && id.trim()) : [];
     
-    const team = new Team({ 
-      name, 
-      chief, 
-      members: validMembers,
+    const team = new Team({
+      name,
+      chief,
+      members: [...validMembers, chief],
     });
     await team.save();
 
@@ -50,17 +51,25 @@ exports.assignTask = async (req, res) => {
 exports.getDashboard = async (req, res) => {
   try {
     const chiefId = req.user.id;
+    console.log("Chief ID:", chiefId);
     
-    // Get teams where user is chief
-    const teams = await Team.find({ chief: chiefId });
-    const teamIds = teams.map(team => team._id);
-    
-    // Handle case where no teams exist
-    if (teams.length === 0) {
+    // Get projects where user is chief
+    const projects = await Project.find({ chief: chiefId }).populate({
+      path: 'tasks',
+      populate: {
+        path: 'assignedTo',
+        select: 'username email'
+      }
+    });
+    console.log("Projects found:", projects.length);
+    console.log("Projects data (first project tasks):", projects.length > 0 ? projects[0].tasks : "No projects");
+
+    // Handle case where no projects exist
+    if (projects.length === 0) {
       return res.json({
         activeProjects: 0,
         tasksCompleted: 0,
-        teamMembers: 0,
+        totalTasks: 0,
         overdueTasks: 0,
         projects: [],
         upcomingTasks: [],
@@ -68,33 +77,31 @@ exports.getDashboard = async (req, res) => {
       });
     }
     
-    // Get all tasks for these teams
-    const tasks = await Task.find({ team: { $in: teamIds } })
-      .populate('team', 'name')
-      .populate('assignedTo', 'name email');
-    
-    // Get team members
-    const teamMembers = await User.find({ 
-      $or: [
-        { _id: { $in: teams.flatMap(team => team.members) } },
-        { _id: chiefId }
-      ]
+    let totalTasks = 0;
+    let tasksCompleted = 0;
+    let overdueTasks = 0;
+    const allTasks = [];
+
+    projects.forEach(project => {
+      console.log("Processing project:", project.name);
+      totalTasks += project.tasks.length;
+      tasksCompleted += project.tasks.filter(task => task.status === 'completed').length;
+      overdueTasks += project.tasks.filter(task => 
+        task.status !== 'completed' && task.dueDate && new Date(task.dueDate) < new Date()
+      ).length;
+      allTasks.push(...project.tasks);
     });
-    
-    // Calculate dashboard metrics
-    const activeProjects = teams.length;
-    const tasksCompleted = tasks.filter(task => task.status === 'completed').length;
-    const overdueTasks = tasks.filter(task => 
-      task.status !== 'completed' && new Date(task.dueDate) < new Date()
-    ).length;
-    
+    console.log("Total tasks collected:", allTasks.length);
+
     // Get upcoming tasks (next 7 days)
-    const upcomingTasks = tasks
+    const upcomingTasks = allTasks
       .filter(task => 
         task.status !== 'completed' && 
+        task.dueDate && 
         new Date(task.dueDate) >= new Date() &&
         new Date(task.dueDate) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
       )
+      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
       .slice(0, 5)
       .map(task => ({
         id: task._id,
@@ -102,34 +109,34 @@ exports.getDashboard = async (req, res) => {
         dueDate: task.dueDate,
         priority: task.priority || 'medium'
       }));
-    
-    // Format projects data
-    const projects = teams.map(team => ({
-      id: team._id,
-      name: team.name,
-      description: team.description || 'No description provided',
-      status: 'active',
-      progress: Math.floor(Math.random() * 100),
-      members: team.members.length,
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    }));
+    console.log("Upcoming tasks:", upcomingTasks.length);
     
     // Format recent activity
-    const recentActivity = tasks.slice(0, 5).map(task => ({
-      id: task._id,
-      user: {
-        name: 'System',
-        initial: 'S'
-      },
-      action: `created task`,
-      target: task.title,
-      time: new Date(task.createdAt).toLocaleDateString()
-    }));
+    const recentActivity = allTasks
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5)
+      .map(task => {
+        const assignedUser = task.assignedTo && task.assignedTo.length > 0 ? task.assignedTo[0] : null;
+        const userName = assignedUser ? assignedUser.username : 'N/A';
+        const userInitial = assignedUser ? assignedUser.username.charAt(0).toUpperCase() : 'N/A';
+
+        return {
+          id: task._id,
+          user: {
+            name: userName,
+            initial: userInitial
+          },
+          action: `created task`,
+          target: task.title,
+          time: new Date(task.createdAt).toLocaleDateString()
+        };
+      });
+    console.log("Recent activity:", recentActivity.length);
     
     res.json({
-      activeProjects,
+      activeProjects: projects.length,
       tasksCompleted,
-      teamMembers: teamMembers.length,
+      totalTasks,
       overdueTasks,
       projects,
       upcomingTasks,
@@ -144,10 +151,26 @@ exports.getDashboard = async (req, res) => {
 
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find({ chief: req.user.id }, '_id name email role');
+    const chiefId = req.user.id;
+
+    // Find all teams managed by this chief
+    const teams = await Team.find({ chief: chiefId });
+
+    // Collect all unique member IDs from these teams, including the chief themselves
+    let memberIds = new Set([chiefId]); // Start with the chief's ID
+    teams.forEach(team => {
+      team.members.forEach(memberId => memberIds.add(memberId.toString()));
+    });
+
+    // Convert Set to Array
+    const uniqueMemberIds = Array.from(memberIds);
+
+    // Find all users whose IDs are in the collected list
+    const users = await User.find({ _id: { $in: uniqueMemberIds } }, '_id username email role'); // Select username instead of name if that's the field you use
     res.json(users);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching assignable users:', error); // Add more specific error logging
+    res.status(500).json({ error: 'Failed to fetch assignable users', details: error.message });
   }
 };
 

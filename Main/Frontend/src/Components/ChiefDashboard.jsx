@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux';
 import CreateTeamModal from './CreateTeamModal';
+import EditTeamModal from './EditTeamModal';
+import { toast } from 'sonner';
 
 function ChiefDashboard() {
     const [data, setData] = useState(null);
@@ -9,10 +11,13 @@ function ChiefDashboard() {
     const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
     const [showEditProjectModal, setShowEditProjectModal] = useState(false);
     const [showCreateTeamModal, setShowCreateTeamModal] = useState(false); // New state for CreateTeamModal
+    const [showEditTeamModal, setShowEditTeamModal] = useState(false);
+    const [editingTeam, setEditingTeam] = useState(null);
     const [newProject, setNewProject] = useState({
         name: '',
         description: '',
         priority: 'medium',
+        teamId: ''
     });
     const [newTask, setNewTask] = useState({
         title: '',
@@ -29,14 +34,15 @@ function ChiefDashboard() {
     const [teams, setTeams] = useState([]);
     const [users, setUsers] = useState([]);
     const [teamMembers, setTeamMembers] = useState([]);
+    const [projectMembers, setProjectMembers] = useState([]); // New state for project-specific members
     const [projects, setProjects] = useState([]);
 
-    console.log('ChiefDashboard rendered. Token:', token);
+    
 
     useEffect(() => {
-        console.log('useEffect in ChiefDashboard triggered. Token:', token);
+        
         const fetchData = async () => {
-            console.log('Fetching chief dashboard data...');
+            
             try {
                 const response = await fetch('http://localhost:3001/api/chief/dashboard', {
                     headers: {
@@ -44,11 +50,11 @@ function ChiefDashboard() {
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const result = await response.json();
                 setData(result);
             } catch (error) {
@@ -58,7 +64,7 @@ function ChiefDashboard() {
         };
 
         const fetchTeams = async () => {
-            console.log('Fetching teams data...');
+            
             try {
                 const response = await fetch('http://localhost:3001/api/chief/teams', {
                     headers: {
@@ -66,11 +72,11 @@ function ChiefDashboard() {
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const result = await response.json();
                 setTeams(result);
             } catch (error) {
@@ -80,7 +86,7 @@ function ChiefDashboard() {
         };
 
         const fetchUsers = async () => {
-            console.log('Fetching users data...');
+            
             try {
                 const response = await fetch('http://localhost:3001/api/chief/users', {
                     headers: {
@@ -102,7 +108,7 @@ function ChiefDashboard() {
         };
 
         const fetchProjects = async () => {
-            console.log('Fetching projects data...');
+            
             try {
                 const response = await fetch('http://localhost:3001/api/chief/projects', {
                     headers: {
@@ -110,11 +116,11 @@ function ChiefDashboard() {
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const result = await response.json();
                 setProjects(result);
             } catch (error) {
@@ -131,6 +137,37 @@ function ChiefDashboard() {
         }
     }, [token]);
 
+    useEffect(() => {
+        console.log({ selectedProjectInEffect: selectedProject, teamIdInEffect: selectedProject?.team?._id }); // Debugging
+        const fetchProjectMembers = async () => {
+            if (selectedProject && selectedProject.team && selectedProject.team._id) {
+                try {
+                    const response = await fetch(`http://localhost:3001/api/chief/teams/${selectedProject.team._id}/members`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    setProjectMembers(result);
+                    console.log({ fetchedProjectMembers: result }); // Debugging
+                } catch (error) {
+                    console.error('Error fetching project members:', error);
+                    setProjectMembers([]);
+                }
+            } else {
+                setProjectMembers([]); // Clear members if no project or team is selected
+            }
+        };
+
+        fetchProjectMembers();
+    }, [selectedProject, token]); // Depend on selectedProject and token
+
     const handleCreateProject = async () => {
         try {
             const response = await fetch('http://localhost:3001/api/chief/projects', {
@@ -144,9 +181,11 @@ function ChiefDashboard() {
             const result = await response.json();
             if (!response.ok) {
                 console.error('Error creating project:', result);
+                toast.error(`Failed to create project: ${result.message || result.error}`);
             } else {
                 setShowCreateProjectModal(false);
-                setNewProject({ name: '', description: '', priority: 'medium' });
+                setNewProject({ name: '', description: '', priority: 'medium', teamId: '' });
+                toast.success('Project created successfully!');
                 // Optionally, refetch projects to update the list
                 const response = await fetch('http://localhost:3001/api/chief/projects', {
                     headers: {
@@ -159,11 +198,13 @@ function ChiefDashboard() {
             }
         } catch (error) {
             console.error('Error creating project:', error);
+            toast.error('An unexpected error occurred while creating the project.');
         }
     };
 
     const handleEditProject = async () => {
-        console.log('Updating project with data:', editProject);
+        console.log('handleEditProject function called');
+        
         try {
             const response = await fetch(`http://localhost:3001/api/chief/projects/${editProject._id}`, {
                 method: 'PUT',
@@ -171,14 +212,22 @@ function ChiefDashboard() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(editProject)
+                body: JSON.stringify({
+                    name: editProject.name,
+                    description: editProject.description,
+                    priority: editProject.priority,
+                    status: editProject.status,
+                    team: editProject.team // Include the team ID
+                })
             });
             const result = await response.json();
             if (!response.ok) {
                 console.error('Error updating project:', result);
+                toast.error(`Failed to update project: ${result.message || result.error}`);
             } else {
                 setShowEditProjectModal(false);
                 setEditProject(null);
+                toast.success('Project updated successfully!');
                 // Optionally, refetch projects to update the list
                 const response = await fetch('http://localhost:3001/api/chief/projects', {
                     headers: {
@@ -191,6 +240,7 @@ function ChiefDashboard() {
             }
         } catch (error) {
             console.error('Error updating project:', error);
+            toast.error('An unexpected error occurred while updating the project.');
         }
     };
 
@@ -207,9 +257,11 @@ function ChiefDashboard() {
             const result = await response.json();
             if (!response.ok) {
                 console.error('Error creating task:', result);
+                toast.error(`Failed to create task: ${result.message || result.error}`);
             } else {
                 setShowCreateTaskModal(false);
                 setNewTask({ title: '', description: '', members: 0, assignedTo: [], dueDate: '', priority: 'medium' });
+                toast.success('Task created successfully!');
                 // Optionally, refetch projects to update the list
                 const response = await fetch('http://localhost:3001/api/chief/projects', {
                     headers: {
@@ -222,6 +274,7 @@ function ChiefDashboard() {
             }
         } catch (error) {
             console.error('Error creating task:', error);
+            toast.error('An unexpected error occurred while creating the task.');
         }
     };
 
@@ -246,8 +299,21 @@ function ChiefDashboard() {
     };
 
     const handleTeamCreated = (newTeam) => {
+        toast.success(`Team "${newTeam.team.name}" created successfully!`);
         // Optionally refresh teams list or add the new team to the state
-        setTeams((prevTeams) => [...prevTeams, newTeam]);
+        setTeams((prevTeams) => [...prevTeams, newTeam.team]);
+    };
+
+    const handleTeamUpdated = (updatedTeam) => {
+        toast.success(`Team "${updatedTeam.name}" updated successfully!`);
+        setTeams((prevTeams) => prevTeams.map((team) => {
+            if (team._id === updatedTeam._id) {
+                
+                setEditingTeam(updatedTeam);
+                return updatedTeam;
+            }
+            return team;
+        }));
     };
 
     if (!data || data.error) {
@@ -268,9 +334,9 @@ function ChiefDashboard() {
                     <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
                     <p className="text-gray-400">Welcome back! Here's what's happening with your projects.</p>
                 </div>
-                
+
                 <div className="mb-8 flex gap-4">
-                    <button 
+                    <button
                         onClick={() => setShowCreateProjectModal(true)}
                         className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center space-x-2 cursor-pointer whitespace-nowrap transition-colors"
                     >
@@ -279,8 +345,8 @@ function ChiefDashboard() {
                         </div>
                         <span>Create Project</span>
                     </button>
-                    
-                    <button 
+
+                    <button
                         onClick={() => setShowTeamDrawer(true)}
                         className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 flex items-center space-x-2 cursor-pointer whitespace-nowrap transition-colors"
                     >
@@ -300,7 +366,7 @@ function ChiefDashboard() {
                                 </div>
                             </div>
                             <div className="ml-4">
-                                <p className="text-2xl font-bold text-white">{data.activeProjects}</p>
+                                <p className="text-2xl font-bold text-white">{data?.activeProjects || 0}</p>
                                 <p className="text-gray-400 text-sm">Active Projects</p>
                             </div>
                         </div>
@@ -313,7 +379,7 @@ function ChiefDashboard() {
                                 </div>
                             </div>
                             <div className="ml-4">
-                                <p className="text-2xl font-bold text-white">{data.tasksCompleted}</p>
+                                <p className="text-2xl font-bold text-white">{data?.tasksCompleted || 0}</p>
                                 <p className="text-gray-400 text-sm">Tasks Completed</p>
                             </div>
                         </div>
@@ -326,7 +392,7 @@ function ChiefDashboard() {
                                 </div>
                             </div>
                             <div className="ml-4">
-                                <p className="text-2xl font-bold text-white">{data.teamMembers}</p>
+                                <p className="text-2xl font-bold text-white">{data?.teamMembers || 0}</p>
                                 <p className="text-gray-400 text-sm">Team Members</p>
                             </div>
                         </div>
@@ -339,7 +405,7 @@ function ChiefDashboard() {
                                 </div>
                             </div>
                             <div className="ml-4 ">
-                                <p className="text-2xl font-bold text-white">{data.overdueTasks}</p>
+                                <p className="text-2xl font-bold text-white">{data?.overdueTasks || 0}</p>
                                 <p className="text-gray-400 text-sm">Overdue Tasks</p>
                             </div>
                         </div>
@@ -352,9 +418,9 @@ function ChiefDashboard() {
                         {projects.length === 0 ? (
                             <div className="text-center text-gray-500 bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700 min-h-[17.3rem] flex items-center justify-center">
                                 <div>
-                                <i className="ri-emotion-2-line text-4xl"></i>
-                                <p>You are all caught up!</p>
-                                <p >To Create a project, click on the <b className='bg-gray-900 p-1 rounded'>' + Create Project'</b> button on the top right corner of the page.</p>
+                                    <i className="ri-emotion-2-line text-4xl"></i>
+                                    <p>You are all caught up!</p>
+                                    <p >To Create a project, click on the <b className='bg-gray-900 p-1 rounded'>' + Create Project'</b> button on the top right corner of the page.</p>
                                 </div>
                             </div>
                         ) : (
@@ -369,8 +435,8 @@ function ChiefDashboard() {
                                             <div className="flex space-x-2">
                                                 <span className={`px-2 py-1 text-xs font-medium rounded-full border ${project.status === 'active' ? 'bg-green-900 text-green-300 border-green-800' : 'bg-blue-900 text-blue-300 border-blue-800'}`}>{project.status}</span>
                                                 <span className={`px-2 py-1 text-xs font-medium rounded-full border ${project.priority === 'high' ? 'bg-red-900 text-red-300 border-red-800' : 'bg-yellow-900 text-yellow-300 border-yellow-800'}`}>{project.priority}</span>
-                                                <button 
-                                                    onClick={() => {setEditProject(project); setShowEditProjectModal(true);}}
+                                                <button
+                                                    onClick={() => { setEditProject(project); setShowEditProjectModal(true); }}
                                                     className="ml-2 text-gray-400 hover:text-white"
                                                 >
                                                     <i className="ri-edit-line"></i>
@@ -383,7 +449,7 @@ function ChiefDashboard() {
                                                 <span className="text-sm font-medium text-white">{project.completionPercentage}%</span>
                                             </div>
                                             <div className="w-full bg-gray-700 rounded-full h-2">
-                                                <div className="bg-blue-500 h-2 rounded-full transition-all duration-300" style={{width: `${project.completionPercentage}%`}}>
+                                                <div className="bg-blue-500 h-2 rounded-full transition-all duration-300" style={{ width: `${project.completionPercentage}%` }}>
                                                 </div>
                                             </div>
                                         </div>
@@ -402,8 +468,12 @@ function ChiefDashboard() {
                                             </div>
                                         </div>
                                         <div className="mt-4">
-                                            <button 
-                                                onClick={() => {setShowCreateTaskModal(true); setSelectedProject(project);}}
+                                            <button
+                                                onClick={() => {
+                                                    setShowCreateTaskModal(true);
+                                                    setSelectedProject(project);
+                                                    console.log({ selectedProjectOnTaskCreate: project }); // Debugging
+                                                }}
                                                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                                             >
                                                 Create Task for Project
@@ -419,15 +489,19 @@ function ChiefDashboard() {
                             <h2 className="text-xl font-semibold text-white mb-6">Upcoming Tasks</h2>
                             <div className="bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-700 min-h-24">
                                 <div className="space-y-4">
-                                    {data.upcomingTasks.map((task) => (
-                                        <div key={task.id} className="flex items-center justify-between p-3 hover:bg-gray-700 rounded-lg transition-colors">
-                                            <div>
-                                                <h4 className="font-medium text-white">{task.name}</h4>
-                                                <p className="text-sm text-gray-400">Due: {task.dueDate}</p>
+                                    {data?.upcomingTasks?.length > 0 ? (
+                                        data.upcomingTasks.map((task) => (
+                                            <div key={task.id} className="flex items-center justify-between p-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                                <div>
+                                                    <h4 className="font-medium text-white">{task.name}</h4>
+                                                    <p className="text-sm text-gray-400">Due: {task.dueDate}</p>
+                                                </div>
+                                                <span className={`px-2 py-1 text-xs font-medium rounded-full border ${task.priority === 'high' ? 'bg-red-900 text-red-300 border-red-800' : task.priority === 'medium' ? 'bg-yellow-900 text-yellow-300 border-yellow-800' : 'bg-green-900 text-green-300 border-green-800'}`}>{task.priority}</span>
                                             </div>
-                                            <span className={`px-2 py-1 text-xs font-medium rounded-full border ${task.priority === 'high' ? 'bg-red-900 text-red-300 border-red-800' : task.priority === 'medium' ? 'bg-yellow-900 text-yellow-300 border-yellow-800' : 'bg-green-900 text-green-300 border-green-800'}`}>{task.priority}</span>
-                                        </div>
-                                    ))}
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-500 text-center py-4">No upcoming tasks</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -457,13 +531,13 @@ function ChiefDashboard() {
             {/* Team Drawer */}
             <div className={`fixed inset-0 z-50 transition-opacity duration-300 ${showTeamDrawer ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                 <div className="fixed inset-0 bg-black/50" onClick={() => setShowTeamDrawer(false)}></div>
-                <div className={`fixed right-0 top-0 h-full w-80 bg-gray-800 shadow-xl transition-transform duration-300 ${showTeamDrawer ? 'translate-x-0' : 'translate-x-full'}`}>
+                <div className={`fixed right-0 top-0 h-[98vh] w-80 bg-gray-800 shadow-xl transition-transform duration-300 ${showTeamDrawer ? 'translate-x-0' : 'translate-x-full'}`}>
                     <div className="p-4 border-b border-gray-700">
                         <div className="flex items-center justify-between">
                             <h2 className="text-lg font-semibold text-white">
                                 {selectedTeam ? selectedTeam.name : 'Teams'}
                             </h2>
-                            <button 
+                            <button
                                 onClick={() => setShowTeamDrawer(false)}
                                 className="text-gray-400 hover:text-white"
                             >
@@ -472,39 +546,44 @@ function ChiefDashboard() {
                         </div>
                     </div>
 
-                    <div className="p-4 overflow-y-auto h-full">
+                    <div className="p-4 overflow-y-auto h-full flex flex-col justify-between">
                         {!selectedTeam ? (
                             <div className="space-y-2">
                                 {teams.map((team) => (
-                                    <div 
+                                    <div
                                         key={team._id}
                                         onClick={() => handleTeamClick(team)}
                                         className="p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors"
                                     >
                                         <h3 className="text-white font-medium">{team.name}</h3>
                                         <p className="text-gray-400 text-sm">{team.members.length} members</p>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setEditingTeam(team); setShowEditTeamModal(true); }}
+                                            className="text-blue-400 hover:text-blue-300 text-sm"
+                                        >
+                                            Edit
+                                        </button>
                                     </div>
                                 ))}
                             </div>
                         ) : (
                             <div>
-                                <button 
+                                <button
                                     onClick={handleBackToTeams}
                                     className="mb-4 text-blue-400 hover:text-blue-300 flex items-center space-x-1"
                                 >
                                     <i className="ri-arrow-left-line"></i>
                                     <span>Back to Teams</span>
                                 </button>
-                                
+
                                 <div className="space-y-3">
                                     <h3 className="text-white font-semibold mb-3">Team Members</h3>
                                     {teamMembers.map((member) => (
                                         <div key={member._id} className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
                                             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
-                                                {member.name.charAt(0).toUpperCase()}
-                                            </div>
+                                                {member.username ? member.username.charAt(0).toUpperCase() : '?'}</div>
                                             <div>
-                                                <p className="text-white font-medium">{member.name}</p>
+                                                <p className="text-white font-medium">{member.username}</p>
                                                 <p className="text-gray-400 text-sm">
                                                     {member.role === 'chief' ? 'Chief' : member.role === 'leader' ? 'Leader' : 'Member'}
                                                 </p>
@@ -514,13 +593,17 @@ function ChiefDashboard() {
                                 </div>
                             </div>
                         )}
-                        <div className="divider"></div>
-                        <button
-                            onClick={() => setShowCreateTeamModal(true)}
-                            className="btn-wide btn-success btn-outline"
-                        >
-                            Create Team
-                        </button>
+                        <div className='mb-[4rem]'>
+                            <div className="divider"></div>
+                            <div className="flex items-center justify-center">
+                            <button
+                                onClick={() => setShowCreateTeamModal(true)}
+                                className="btn btn-wide btn-outline btn-success mb-0"
+                            >
+                                Create Team
+                            </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -535,7 +618,7 @@ function ChiefDashboard() {
                                 <input
                                     type="text"
                                     value={newProject.name}
-                                    onChange={(e) => setNewProject({...newProject, name: e.target.value})}
+                                    onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                                     placeholder="Enter project name"
                                 />
@@ -544,7 +627,7 @@ function ChiefDashboard() {
                                 <label className="block text-sm font-medium text-gray-300 mb-1">Description</label>
                                 <textarea
                                     value={newProject.description}
-                                    onChange={(e) => setNewProject({...newProject, description: e.target.value})}
+                                    onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
                                     className="w-full p-3 border border-gray-600 rounded-lg resize-none h-20 text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                                     placeholder="Enter project description"
                                     maxLength={500}
@@ -554,7 +637,7 @@ function ChiefDashboard() {
                                 <label className="block text-sm font-medium text-gray-300 mb-1">Priority</label>
                                 <select
                                     value={newProject.priority}
-                                    onChange={(e) => setNewProject({...newProject, priority: e.target.value})}
+                                    onChange={(e) => setNewProject({ ...newProject, priority: e.target.value })}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white focus:border-blue-500 focus:outline-none"
                                 >
                                     <option value="low">Low</option>
@@ -562,15 +645,28 @@ function ChiefDashboard() {
                                     <option value="high">High</option>
                                 </select>
                             </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Team</label>
+                                <select
+                                    value={newProject.teamId}
+                                    onChange={(e) => setNewProject({ ...newProject, teamId: e.target.value })}
+                                    className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white focus:border-blue-500 focus:outline-none"
+                                >
+                                    <option value="">Select a team</option>
+                                    {teams.map((team) => (
+                                        <option key={team._id} value={team._id}>{team.name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                         <div className="flex justify-end space-x-3 mt-6">
-                            <button 
+                            <button
                                 onClick={() => setShowCreateProjectModal(false)}
                                 className="px-4 py-2 text-gray-400 hover:text-white cursor-pointer whitespace-nowrap transition-colors"
                             >
                                 Cancel
                             </button>
-                            <button 
+                            <button
                                 onClick={handleCreateProject}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer whitespace-nowrap transition-colors"
                             >
@@ -591,7 +687,7 @@ function ChiefDashboard() {
                                 <input
                                     type="text"
                                     value={newTask.title}
-                                    onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                                    onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                                     placeholder="Enter task name"
                                 />
@@ -600,7 +696,7 @@ function ChiefDashboard() {
                                 <label className="block text-sm font-medium text-gray-300 mb-1">Description</label>
                                 <textarea
                                     value={newTask.description}
-                                    onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+                                    onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
                                     className="w-full p-3 border border-gray-600 rounded-lg resize-none h-20 text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                                     placeholder="Enter task description"
                                     maxLength={500}
@@ -611,7 +707,7 @@ function ChiefDashboard() {
                                 <input
                                     type="number"
                                     value={newTask.members}
-                                    onChange={(e) => setNewTask({...newTask, members: e.target.value})}
+                                    onChange={(e) => setNewTask({ ...newTask, members: e.target.value })}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                                     placeholder="Enter number of members"
                                 />
@@ -621,11 +717,12 @@ function ChiefDashboard() {
                                 <select
                                     multiple
                                     value={newTask.assignedTo}
-                                    onChange={(e) => setNewTask({...newTask, assignedTo: Array.from(e.target.selectedOptions, option => option.value)})}
+                                    onChange={(e) => setNewTask({ ...newTask, assignedTo: Array.from(e.target.selectedOptions, option => option.value) })}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                                 >
-                                    {users.map((user) => (
-                                        <option key={user._id} value={user._id}>{user.username}</option>
+                                    {console.log({ projectMembersInRender: projectMembers })} {/* Debugging */}
+                                    {projectMembers.map((member) => (
+                                        <option key={member._id} value={member._id}>{member.username}</option>
                                     ))}
                                 </select>
                             </div>
@@ -634,7 +731,7 @@ function ChiefDashboard() {
                                 <input
                                     type="date"
                                     value={newTask.dueDate}
-                                    onChange={(e) => setNewTask({...newTask, dueDate: e.target.value})}
+                                    onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                                 />
                             </div>
@@ -642,7 +739,7 @@ function ChiefDashboard() {
                                 <label className="block text-sm font-medium text-gray-300 mb-1">Priority</label>
                                 <select
                                     value={newTask.priority}
-                                    onChange={(e) => setNewTask({...newTask, priority: e.target.value})}
+                                    onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white focus:border-blue-500 focus:outline-none"
                                 >
                                     <option value="low">Low</option>
@@ -652,13 +749,13 @@ function ChiefDashboard() {
                             </div>
                         </div>
                         <div className="flex justify-end space-x-3 mt-6">
-                            <button 
+                            <button
                                 onClick={() => setShowCreateTaskModal(false)}
                                 className="px-4 py-2 text-gray-400 hover:text-white cursor-pointer whitespace-nowrap transition-colors"
                             >
                                 Cancel
                             </button>
-                            <button 
+                            <button
                                 onClick={handleCreateTaskInProject}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer whitespace-nowrap transition-colors"
                             >
@@ -679,7 +776,7 @@ function ChiefDashboard() {
                                 <input
                                     type="text"
                                     value={editProject.name}
-                                    onChange={(e) => setEditProject({...editProject, name: e.target.value})}
+                                    onChange={(e) => setEditProject({ ...editProject, name: e.target.value })}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                                     placeholder="Enter project name"
                                 />
@@ -688,7 +785,7 @@ function ChiefDashboard() {
                                 <label className="block text-sm font-medium text-gray-300 mb-1">Description</label>
                                 <textarea
                                     value={editProject.description}
-                                    onChange={(e) => setEditProject({...editProject, description: e.target.value})}
+                                    onChange={(e) => setEditProject({ ...editProject, description: e.target.value })}
                                     className="w-full p-3 border border-gray-600 rounded-lg resize-none h-20 text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                                     placeholder="Enter project description"
                                     maxLength={500}
@@ -698,7 +795,7 @@ function ChiefDashboard() {
                                 <label className="block text-sm font-medium text-gray-300 mb-1">Priority</label>
                                 <select
                                     value={editProject.priority}
-                                    onChange={(e) => setEditProject({...editProject, priority: e.target.value})}
+                                    onChange={(e) => setEditProject({ ...editProject, priority: e.target.value })}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white focus:border-blue-500 focus:outline-none"
                                 >
                                     <option value="low">Low</option>
@@ -710,7 +807,7 @@ function ChiefDashboard() {
                                 <label className="block text-sm font-medium text-gray-300 mb-1">Status</label>
                                 <select
                                     value={editProject.status}
-                                    onChange={(e) => setEditProject({...editProject, status: e.target.value})}
+                                    onChange={(e) => setEditProject({ ...editProject, status: e.target.value })}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white focus:border-blue-500 focus:outline-none"
                                 >
                                     <option value="pending">Pending</option>
@@ -719,15 +816,28 @@ function ChiefDashboard() {
                                     <option value="on-hold">On Hold</option>
                                 </select>
                             </div>
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Team</label>
+                                <select
+                                    value={editProject.team ? editProject.team._id : ''} // Access _id for populated team object
+                                    onChange={(e) => setEditProject({ ...editProject, team: e.target.value })}
+                                    className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white focus:border-blue-500 focus:outline-none"
+                                >
+                                    <option value="">Select a team</option>
+                                    {teams.map((team) => (
+                                        <option key={team._id} value={team._id}>{team.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            </div>
                         <div className="flex justify-end space-x-3 mt-6">
-                            <button 
+                            <button
                                 onClick={() => setShowEditProjectModal(false)}
                                 className="px-4 py-2 text-gray-400 hover:text-white cursor-pointer whitespace-nowrap transition-colors"
                             >
                                 Cancel
                             </button>
-                            <button 
+                            <button
                                 onClick={handleEditProject}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer whitespace-nowrap transition-colors"
                             >
@@ -738,10 +848,16 @@ function ChiefDashboard() {
                 </div>
             )}
 
-            <CreateTeamModal 
+            <CreateTeamModal
                 show={showCreateTeamModal}
                 onClose={() => setShowCreateTeamModal(false)}
                 onTeamCreated={handleTeamCreated}
+            />
+            <EditTeamModal
+                show={showEditTeamModal}
+                onClose={() => setShowEditTeamModal(false)}
+                team={editingTeam}
+                onTeamUpdated={handleTeamUpdated}
             />
         </div>
     )

@@ -17,14 +17,14 @@ function useAuth() {
     };
 }
 
-function getRoleLabel(role: string) {
+function getRoleLabel(role) {
     const labels = {
         admin: 'Administrator',
         chief: 'Chief',
         leader: 'Leader',
         member: 'Member'
     };
-    return labels[role as keyof typeof labels] || 'User';
+    return labels[role] || 'User';
 }
 
 export default function Header() {
@@ -57,14 +57,14 @@ export default function Header() {
         navigationItems.push({ to: '/analytics', label: 'Analytics', icon: 'ri-bar-chart-line' });
     }
 
-    const getRoleBadgeColor = (role: string) => {
+    const getRoleBadgeColor = (role) => {
         const colors = {
             admin: 'bg-red-900/50 text-red-400 border-red-700',
             chief: 'bg-blue-900/50 text-blue-400 border-blue-700',
             leader: 'bg-green-900/50 text-green-400 border-green-700',
             member: 'bg-gray-700/50 text-gray-400 border-gray-600'
         };
-        return colors[role as keyof typeof colors] || colors.member;
+        return colors[role] || colors.member;
     };
 
     if (!user) {
@@ -151,7 +151,7 @@ export default function Header() {
                                     <div className="px-4 py-2 border-b border-gray-700">
                                         <p className="text-white text-sm font-medium">{user.fullName}</p>
                                         <p className="text-gray-400 text-xs">{user.email}</p>
-                                        <div className={`inline-block px-2 py-1 rounded-md text-xs border mt-1 ${getRoleBadgeColor(user.role)}`}>
+                                        <div className={`inline-block px-2 py-1 rounded-md text-xs border ${getRoleBadgeColor(user.role)}`}>
                                             {getRoleLabel(user.role)}
                                         </div>
                                     </div>
