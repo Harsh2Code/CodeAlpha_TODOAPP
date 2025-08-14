@@ -8,6 +8,7 @@ const config = require('./config/config');
 require('./Models/Users');
 require('./Models/Tasks');
 require('./Models/Projects');
+require('./Models/Notification');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -28,20 +29,16 @@ mongoose.connect(config.mongoURI, { useNewUrlParser: true, useUnifiedTopology: t
   .catch(err => console.log('MongoDB connection error:', err));
 
 const authRoutes = require('./routers/auth/auth-routes');
+const chiefRoutes = require('./routers/Chief/index.js');
+const adminRoutes = require('./routers/Admin/index.js');
+const memberRoutes = require('./routers/Member/index.js');
+const notificationRoutes = require('./routers/notificationRoutes');
 
 app.use('/api/auth', authRoutes);
-
-const chiefRoutes = require('./routers/Chief/index.js');
-
 app.use('/api/chief', chiefRoutes);
-
-const adminRoutes = require('./routers/Admin/index.js');
-
 app.use('/api/admin', adminRoutes);
-
-const memberRoutes = require('./routers/Member/index.js');
-
 app.use('/api/member', memberRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

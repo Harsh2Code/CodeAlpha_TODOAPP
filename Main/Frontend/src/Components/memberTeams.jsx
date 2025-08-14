@@ -70,6 +70,61 @@ function MemberTeams() {
                     <p className="text-gray-400">Manage and track your teams</p>
                 </div>
             </div>
+            {/* Dynamic Team Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
+                    <div className="flex items-center">
+                        <div className="w-12 h-12 bg-blue-900 rounded-lg flex items-center justify-center">
+                            <i className="ri-team-line text-blue-400 text-xl"></i>
+                        </div>
+                        <div className="ml-4">
+                            <p className="text-2xl font-bold text-white">{teams.length}</p>
+                            <p className="text-gray-400 text-sm">Total Teams</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
+                    <div className="flex items-center">
+                        <div className="w-12 h-12 bg-green-900 rounded-lg flex items-center justify-center">
+                            <i className="ri-user-line text-green-400 text-xl"></i>
+                        </div>
+                        <div className="ml-4">
+                            <p className="text-2xl font-bold text-white">
+                                {teams.reduce((total, team) => total + (team.members?.length || 0), 0)}
+                            </p>
+                            <p className="text-gray-400 text-sm">Total Members</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
+                    <div className="flex items-center">
+                        <div className="w-12 h-12 bg-emerald-900 rounded-lg flex items-center justify-center">
+                            <i className="ri-user-smile-line text-emerald-400 text-xl"></i>
+                        </div>
+                        <div className="ml-4">
+                            <p className="text-2xl font-bold text-white">
+                                {teams.reduce((online, team) => 
+                                    online + (team.members?.filter(member => member.isOnline)?.length || 0), 0)
+                                }
+                            </p>
+                            <p className="text-gray-400 text-sm">Members Online</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
+                    <div className="flex items-center">
+                        <div className="w-12 h-12 bg-purple-900 rounded-lg flex items-center justify-center">
+                            <i className="ri-folder-user-line text-purple-400 text-xl"></i>
+                        </div>
+                        <div className="ml-4">
+                            <p className="text-2xl font-bold text-white">
+                                {teams.reduce((projects, team) => projects + (team.projects?.length || 0), 0)}
+                            </p>
+                            <p className="text-gray-400 text-sm">Active Projects</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {teams.length === 0 ? (
                     <div className="text-center text-gray-500 bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700 min-h-[17.3rem] flex items-center justify-center col-span-full">

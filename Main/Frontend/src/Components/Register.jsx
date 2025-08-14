@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
-import { RegisterUser } from '../redux/authSlice'
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { RegisterUser } from '../redux/authSlice';
+import { toast } from 'sonner';
 
 function Register() {
     const [formData, setFormData] = useState({
@@ -14,17 +15,12 @@ function Register() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { loading, error } = useSelector((state) => state.auth || {});
-    const [message, setMessage] = useState(null);
-    const [success, setSuccess] = useState(false);
-    const timerRef = useRef(null);
 
     useEffect(() => {
-        return () => {
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-            }
-        };
-    }, []);
+        if (error) {
+            toast.error(error);
+        }
+    }, [error]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -39,16 +35,18 @@ function Register() {
         try {
             const result = await dispatch(RegisterUser(formData)).unwrap();
             if (result.success) {
-                navigate('/login');
+                toast.success('Account created successfully! Redirecting to login...');
+                setTimeout(() => navigate('/login'), 2000);
             }
         } catch (err) {
-            // Error handled by Redux state
+            // Error is handled by the useEffect hook watching the error state
+            console.error("Registration failed:", err);
         }
     }
 
     const roles = [
         { value: 'Member', label: 'Member', description: 'Regular team member', color: 'blue' },
-        {value: 'Leader', label: 'Leader', description: 'Team leader', color: 'orange'},
+        { value: 'Leader', label: 'Leader', description: 'Team leader', color: 'orange' },
         { value: 'Chief', label: 'Chief', description: 'Team chief', color: 'green' },
         { value: 'Admin', label: 'Admin', description: 'System administrator', color: 'red' }
     ];
@@ -72,18 +70,6 @@ function Register() {
                             <img src="/cha-bubbles-two-svgrepo-com.svg" alt="logo" className="w-12 mx-auto" />
                             <p className="text-gray-400 mt-2">Create your account</p>
                         </div>
-
-                        {message && !error && (
-                            <div className={`mb-4 p-3 rounded-lg ${success ? 'bg-green-900/50 border border-green-700' : 'bg-blue-900/50 border border-blue-700'}`}>
-                                <p className={`${success ? 'text-green-400' : 'text-blue-400'} text-sm`}>{message}</p>
-                            </div>
-                        )}
-
-                        {error && (
-                            <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg">
-                                <p className="text-red-400 text-sm">{error}</p>
-                            </div>
-                        )}
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div>

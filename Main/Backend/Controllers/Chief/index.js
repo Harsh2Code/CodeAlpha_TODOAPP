@@ -153,23 +153,15 @@ exports.getUsers = async (req, res) => {
   try {
     const chiefId = req.user.id;
 
-    // Find all teams managed by this chief
-    const teams = await Team.find({ chief: chiefId });
+    // Find all users with the 'Member' role, excluding the chief themselves
+    const users = await User.find({
+      role: 'Member',
+      _id: { $ne: chiefId } 
+    }, '_id username email role');
 
-    // Collect all unique member IDs from these teams, including the chief themselves
-    let memberIds = new Set([chiefId]); // Start with the chief's ID
-    teams.forEach(team => {
-      team.members.forEach(memberId => memberIds.add(memberId.toString()));
-    });
-
-    // Convert Set to Array
-    const uniqueMemberIds = Array.from(memberIds);
-
-    // Find all users whose IDs are in the collected list
-    const users = await User.find({ _id: { $in: uniqueMemberIds } }, '_id username email role'); // Select username instead of name if that's the field you use
     res.json(users);
   } catch (error) {
-    console.error('Error fetching assignable users:', error); // Add more specific error logging
+    console.error('Error fetching assignable users:', error);
     res.status(500).json({ error: 'Failed to fetch assignable users', details: error.message });
   }
 };

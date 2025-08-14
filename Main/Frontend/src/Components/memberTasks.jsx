@@ -140,6 +140,59 @@ function MemberTasks() {
                     <p className="text-gray-400">Manage and track your assigned tasks</p>
                 </div>
             </div>
+            {/* Dynamic Task Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
+                    <div className="flex items-center">
+                        <div className="w-12 h-12 bg-blue-900 rounded-lg flex items-center justify-center">
+                            <i className="ri-list-check text-blue-400 text-xl"></i>
+                        </div>
+                        <div className="ml-4">
+                            <p className="text-2xl font-bold text-white">{tasks.length}</p>
+                            <p className="text-gray-400 text-sm">Total Tasks</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
+                    <div className="flex items-center">
+                        <div className="w-12 h-12 bg-green-900 rounded-lg flex items-center justify-center">
+                            <i className="ri-checkbox-circle-line text-green-400 text-xl"></i>
+                        </div>
+                        <div className="ml-4">
+                            <p className="text-2xl font-bold text-white">
+                                {tasks.filter(task => task.status === 'completed').length}
+                            </p>
+                            <p className="text-gray-400 text-sm">Completed</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
+                    <div className="flex items-center">
+                        <div className="w-12 h-12 bg-yellow-900 rounded-lg flex items-center justify-center">
+                            <i className="ri-time-line text-yellow-400 text-xl"></i>
+                        </div>
+                        <div className="ml-4">
+                            <p className="text-2xl font-bold text-white">
+                                {tasks.filter(task => task.status === 'pending' || task.status === 'in-progress').length}
+                            </p>
+                            <p className="text-gray-400 text-sm">Pending</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
+                    <div className="flex items-center">
+                        <div className="w-12 h-12 bg-red-900 rounded-lg flex items-center justify-center">
+                            <i className="ri-alarm-line text-red-400 text-xl"></i>
+                        </div>
+                        <div className="ml-4">
+                            <p className="text-2xl font-bold text-white">
+                                {tasks.filter(task => task.priority === 'high').length}
+                            </p>
+                            <p className="text-gray-400 text-sm">High Priority</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div className="grid grid-cols-1 gap-6">
                 {tasks.length === 0 ? (
                     <div className="text-center text-gray-500 bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700 min-h-[17.3rem] flex items-center justify-center col-span-full">

@@ -14,14 +14,14 @@ function ChiefTasks() {
         description: '',
         dueDate: '',
         priority: 'medium',
-        project: '', // Added project field
-        assignedTo: [], // Array of user IDs
+        project: '',
+        assignedTo: [],
     });
-    const [users, setUsers] = useState([]); // All users, for general display if needed
-    const [teams, setTeams] = useState([]); // All teams
-    const [projects, setProjects] = useState([]); // All projects
+    const [users, setUsers] = useState([]);
+    const [teams, setTeams] = useState([]);
+    const [projects, setProjects] = useState([]);
     const [selectedProjectId, setSelectedProjectId] = useState('');
-    const [assignableMembers, setAssignableMembers] = useState([]); // Members of the selected project's team
+    const [assignableMembers, setAssignableMembers] = useState([]);
 
     // Fetch existing tasks
     useEffect(() => {
@@ -55,7 +55,7 @@ function ChiefTasks() {
         }
     }, [token]);
 
-    // Fetch all users (for general display or if not project-specific assignment)
+    // Fetch all users
     useEffect(() => {
         const fetchAllUsers = async () => {
             try {
@@ -71,16 +71,16 @@ function ChiefTasks() {
                 }
                 const result = await response.json();
                 setUsers(result);
-                console.log('Fetched Users:', result); // Debugging
+                console.log('Fetched Users:', result);
             } catch (err) {
                 console.error('Error fetching all users:', err);
-                setError(err.message || 'Failed to load users.'); // Add setError here
+                setError(err.message || 'Failed to load users.');
             }
         };
-        if (token) { // This line was missing
-            fetchAllUsers(); // This line was missing
-        } // This line was missing
-    }, [token]); // This line was missing
+        if (token) {
+            fetchAllUsers();
+        }
+    }, [token]);
 
     // Fetch all teams
     useEffect(() => {
@@ -98,10 +98,10 @@ function ChiefTasks() {
                 }
                 const result = await response.json();
                 setTeams(result);
-                console.log('Fetched Teams:', result); // Debugging
+                console.log('Fetched Teams:', result);
             } catch (err) {
                 console.error('Error fetching teams:', err);
-                setError(err.message || 'Failed to load teams.'); // Add setError here
+                setError(err.message || 'Failed to load teams.');
             }
         };
 
@@ -126,10 +126,10 @@ function ChiefTasks() {
                 }
                 const result = await response.json();
                 setProjects(result);
-                console.log('Fetched Projects:', result); // Debugging
+                console.log('Fetched Projects:', result);
             } catch (err) {
                 console.error('Error fetching projects:', err);
-                setError(err.message || 'Failed to load projects.'); // Add setError here
+                setError(err.message || 'Failed to load projects.');
             }
         };
 
@@ -145,27 +145,25 @@ function ChiefTasks() {
             if (project && project.team) {
                 console.log('Project found with team:', project);
                 console.log('Project team ID:', project.team._id);
-                
-                // Handle both direct team reference and populated team object
+
                 const teamId = typeof project.team === 'string' ? project.team : project.team._id;
                 const team = teams.find(t => t._id === teamId);
-                
+
                 if (team && team.members && team.members.length > 0) {
                     console.log('Team found with members:', team);
-                    
-                    // Handle both populated and unpopulated member objects
+
                     const teamMemberIds = team.members.map(member => {
                         return typeof member === 'string' ? member : member._id;
                     });
-                    
+
                     console.log('Team member IDs:', teamMemberIds);
                     console.log('All users:', users);
-                    
+
                     const membersOfSelectedTeam = users.filter(user => {
                         const userId = user._id.toString();
                         return teamMemberIds.some(memberId => memberId.toString() === userId);
                     });
-                    
+
                     console.log('Filtered assignable members:', membersOfSelectedTeam);
                     setAssignableMembers(membersOfSelectedTeam);
                 } else {
@@ -184,7 +182,6 @@ function ChiefTasks() {
 
     const handleCreateTask = async () => {
         try {
-            // Ensure project is selected
             if (!newTask.project) {
                 setError('Please select a project for the task.');
                 toast.error('Please select a project for the task.');
@@ -203,7 +200,7 @@ function ChiefTasks() {
             if (!response.ok) {
                 throw new Error(result.message || 'Failed to create task');
             }
-            setTasks((prevTasks) => [...prevTasks, result.task]); // Assuming backend returns the created task
+            setTasks((prevTasks) => [...prevTasks, result.task]);
             toast.success('Task created successfully!');
             setNewTask({
                 title: '',
@@ -213,7 +210,7 @@ function ChiefTasks() {
                 project: '',
                 assignedTo: [],
             });
-            setSelectedProjectId(''); // Reset selected project
+            setSelectedProjectId('');
             setShowCreateTaskModal(false);
         } catch (err) {
             console.error('Error creating task:', err);
@@ -230,7 +227,7 @@ function ChiefTasks() {
     const handleProjectChange = (e) => {
         const projectId = e.target.value;
         setSelectedProjectId(projectId);
-        setNewTask(prev => ({ ...prev, project: projectId, assignedTo: [] })); // Reset assignedTo when project changes
+        setNewTask(prev => ({ ...prev, project: projectId, assignedTo: [] }));
     };
 
     if (loading) {

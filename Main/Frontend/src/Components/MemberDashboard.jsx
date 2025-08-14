@@ -170,8 +170,8 @@ function MemberDashboard() {
                         <div key={feature.id} className="bg-gray-800 rounded-lg shadow-sm text-center border border-gray-700">
                             <div className="card-body">
                                 <i className={`ri-${feature.icon}-line text-center text-4xl p-3 px-0 rounded-[50%] mx-auto text-${feature.color}-400 bg-${feature.color}-800 w-[70px]`}></i>
-                                <h2 className="card-title">{feature.title}</h2>
-                                <p className="text-left">{feature.description}</p>
+                                <h2 className="card-title text-white">{feature.title}</h2>
+                                <p className="text-left text-gray-400">{feature.description}</p>
                             </div>
                         </div>
                     ))}

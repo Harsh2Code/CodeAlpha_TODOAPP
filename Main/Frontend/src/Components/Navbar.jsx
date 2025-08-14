@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../redux/authSlice';
+import NotificationDropdown from './NotificationDropdown';
 
 const getRoleBadgeColor = (role) => {
   const colors = {
@@ -37,9 +38,9 @@ function Navbar() {
     navigationItems.push({ href: '/admin', label: 'Admin', icon: 'ri-settings-line' });
   }
 
-  if (user && ['admin', 'chief'].includes(user.role)) {
-    navigationItems.push({ href: `/${rolePrefix}/analytics`, label: 'Analytics', icon: 'ri-bar-chart-line' });
-  }
+  // if (user && ['admin', 'chief'].includes(user.role)) {
+  //   navigationItems.push({ href: `/${rolePrefix}/analytics`, label: 'Analytics', icon: 'ri-bar-chart-line' });
+  // }
 
   const getRoleLabel = (role) => {
     const labels = {
@@ -79,6 +80,7 @@ function Navbar() {
           </nav>
   
           <div className="flex items-center space-x-4">
+            <NotificationDropdown />
   
             <div className={`px-2 py-1 rounded-md text-xs border ${getRoleBadgeColor(user?.role)}`} >
               {getRoleLabel(user?.role)}
@@ -89,7 +91,7 @@ function Navbar() {
                 className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
               >
                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
-                  {user?.avatar || (user?.username ? user.username.charAt(0).toUpperCase() : '')}
+                  {user?.avatar || (user?.email ? user.email.charAt(0).toUpperCase() : '?')}
                 </div>
                 <div className="hidden sm:block text-left">
                   <p className="text-white text-sm font-medium">{user?.username}</p>
