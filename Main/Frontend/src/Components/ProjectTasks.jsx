@@ -22,16 +22,18 @@ function ProjectTasks() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const result = await response.json();
-            console.log("API response result:", result); // Log the raw result
-            // Filter tasks that are assigned to the current user and assigned by their chief
-            const filteredTasks = result.filter(task =>
-                task.assignedTo === user.id &&
-                task.assignedBy === user.chief
-            );
-            setTasks(filteredTasks);
+            console.log("API response result:", result);
+            
+            // Handle both array and object response formats
+            const tasksArray = Array.isArray(result) ? result : result.tasks || [];
+            console.log("Tasks array:", tasksArray);
+            
+            // Remove filtering to show all tasks for the project
+            // The backend should already filter by project and user context
+            setTasks(tasksArray);
             toast.success('Project tasks loaded successfully!');
         } catch (err) {
-            console.error('Error fetching project tasks:', err); // Log the full error object
+            console.error('Error fetching project tasks:', err);
             setError('Failed to load project tasks.');
             toast.error('Failed to load project tasks.');
         } finally {
@@ -39,21 +41,14 @@ function ProjectTasks() {
         }
     };
 
-    useEffect(() => {
-        if (token && user && user.chief && projectId) {
-            fetchProjectTasks();
-        }
-    }, [token, user, projectId]);
-
     const handleMarkTaskDone = async (taskId) => {
         try {
-            const response = await fetch(`/api/member/tasks/${taskId}/mark-done`, {
-                method: 'PUT',
+            const response = await fetch(`/api/member/tasks/${taskId}/complete`, {
+                method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ status: 'completed' })
+                }
             });
 
             if (!response.ok) {
@@ -61,7 +56,7 @@ function ProjectTasks() {
             }
 
             toast.success('Task marked as done!');
-            // Re-fetch tasks to update the UI and reflect project progress changes
+            // Re-fetch tasks to update the UI
             fetchProjectTasks();
 
         } catch (err) {
@@ -69,6 +64,12 @@ function ProjectTasks() {
             toast.error('Failed to mark task done.');
         }
     };
+
+    useEffect(() => {
+        if (token && user && projectId) {
+            fetchProjectTasks();
+        }
+    }, [token, user, projectId]);
 
     if (loading) {
         return (
@@ -102,13 +103,13 @@ function ProjectTasks() {
                     <div className="text-center text-gray-500 bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700 min-h-[17.3rem] flex items-center justify-center col-span-full">
                         <div>
                             <i className="ri-emotion-2-line text-4xl"></i>
-                            <p>No tasks found for this project assigned to you by your chief.</p>
+                            <p>No tasks found for this project.</p>
                         </div>
                     </div>
                 ) : (
                     tasks.map((task) => (
                         <div key={task._id} className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
-                            <h3 className="text-xl font-semibold text-white mb-2">{task.name}</h3>
+                            <h3 className="text-xl font-semibold text-white mb-2">{task.title || task.name}</h3>
                             <p className="text-gray-400 mb-4">{task.description}</p>
                             <div className="flex justify-between items-center text-sm">
                                 <span className={`px-3 py-1 rounded-full ${task.status === 'completed' ? 'bg-green-900 text-green-300' : 'bg-blue-900 text-blue-300'}`}>{task.status}</span>

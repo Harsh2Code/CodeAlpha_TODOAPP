@@ -8,6 +8,28 @@ function MemberTasks() {
     const [error, setError] = useState(null);
     const { token, user } = useSelector((state) => state.auth);
 
+    const updateProjectProgress = async (projectId) => {
+        try {
+            const response = await fetch(`/api/member/projects/${projectId}/progress`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const progressData = await response.json();
+            return progressData;
+        } catch (err) {
+            console.error('Error updating project progress:', err);
+            return null;
+        }
+    };
+
     const markTaskAsDone = async (taskId) => {
         try {
             const response = await fetch(`/api/member/tasks/${taskId}/complete`, {
@@ -23,11 +45,19 @@ function MemberTasks() {
             }
 
             const updatedTask = await response.json();
+            
+            // Update task status in local state
             setTasks(prevTasks =>
                 prevTasks.map(task =>
                     task._id === taskId ? { ...task, status: 'completed' } : task
                 )
             );
+            
+            // Update project progress
+            if (updatedTask.project) {
+                await updateProjectProgress(updatedTask.project);
+            }
+            
             toast.success('Task marked as completed!');
         } catch (err) {
             console.error('Error marking task as done:', err);
