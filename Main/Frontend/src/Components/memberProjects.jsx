@@ -53,7 +53,7 @@ function MemberProjects() {
             }
         };
 
-        if (token && user && user.chief) {
+        if (token && user) {
             fetchDetailedProjects();
         }
     }, [token, user]);

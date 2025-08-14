@@ -25,7 +25,19 @@ function Navbar() {
     navigate('/login');
   };
 
-  const rolePrefix = user?.role === 'chief' ? 'chief' : 'member';
+  const role = user?.role?.toLowerCase(); // Ensure role is lowercase for consistent comparison
+  let rolePrefix;
+
+  switch (role) {
+    case 'admin':
+      rolePrefix = 'admin';
+      break;
+    case 'chief':
+      rolePrefix = 'chief';
+      break;
+    default:
+      rolePrefix = 'member';
+  }
 
   const navigationItems = [
     { href: `/${rolePrefix}/dashboard`, label: 'Dashboard', icon: 'ri-dashboard-line' },
@@ -82,8 +94,8 @@ function Navbar() {
           <div className="flex items-center space-x-4">
             <NotificationDropdown />
   
-            <div className={`px-2 py-1 rounded-md text-xs border ${getRoleBadgeColor(user?.role)}`} >
-              {getRoleLabel(user?.role)}
+            <div className={`px-2 py-1 rounded-md text-xs border ${getRoleBadgeColor(role)}`} >
+              {getRoleLabel(role)}
             </div>
             <div className="relative">
               <button
@@ -107,8 +119,8 @@ function Navbar() {
                   <div className="px-4 py-2 border-b border-gray-700">
                     <p className="text-white text-sm font-medium">{user?.username}</p>
                     <p className="text-gray-400 text-xs">{user?.email}</p>
-                    <div className={`inline-block px-2 py-1 rounded-md text-xs border mt-1 ${getRoleBadgeColor(user?.role)}`}>
-                      {getRoleLabel(user?.role)}
+                    <div className={`inline-block px-2 py-1 rounded-md text-xs border mt-1 ${getRoleBadgeColor(role)}`}>
+                      {getRoleLabel(role)}
                     </div>
                   </div>
                   

@@ -1,4 +1,5 @@
 const Task = require('../../Models/Tasks');
+const Project = require('../../Models/Projects'); // Import Project model
 
 exports.getTasks = async (req, res) => {
     try {
@@ -40,6 +41,9 @@ exports.assignTask = async (req, res) => {
         });
 
         await newTask.save();
+
+        // Add the task to the project's tasks array
+        await Project.findByIdAndUpdate(project, { $push: { tasks: newTask._id } });
 
         res.status(201).json({ message: 'Task assigned successfully', task: newTask });
     } catch (error) {

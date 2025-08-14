@@ -25,32 +25,48 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
+  console.log('Login function started.');
   if (!process.env.JWT_SECRET) {
     console.error('JWT_SECRET is not defined in your environment variables');
     return res.status(500).json({ error: 'Server configuration error: JWT_SECRET is missing.' });
   }
 
-  const { email, password } = req.body; // Changed from username to email
+  const { email, password } = req.body;
   console.log('Login attempt for email:', email);
   try {
-    const user = await User.findOne({ email }); // Changed from username to email
+    console.log('Searching for user in database...');
+    const user = await User.findOne({ email });
     if (!user) {
       console.log('User not found for email:', email);
       return res.status(404).json({ message: 'User not found' });
     }
-    console.log('User found. Comparing passwords...');
+    console.log('User found:', user);
+
+    console.log('Comparing passwords...');
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       console.log('Password mismatch for email:', email);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-    console.log('Password matched. Generating token...');
+    console.log('Passwords matched.');
+
+    console.log('Converting user to object...');
     const userObject = user.toObject();
+    console.log('User object:', userObject);
+
     const userId = userObject._id.toString();
+    console.log('User ID:', userId);
+
     const userRole = userObject.role || 'Member';
+    console.log('User role:', userRole);
+
+    console.log('Signing JWT token...');
     const token = jwt.sign({ id: userId, role: userRole }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    console.log('Login successful for email:', email);
-    res.json({ token, user: { id: userId, role: userRole, chief: user.chief } }); // Added user role and chief to response
+    console.log('Token generated.');
+
+    console.log('Sending response...');
+    res.json({ token, user: { id: userId, role: userRole, chief: user.chief } });
+    console.log('Response sent successfully.');
   } catch (error) {
     console.error('Detailed error during login:', error);
     res.status(500).json({ error: error.message });

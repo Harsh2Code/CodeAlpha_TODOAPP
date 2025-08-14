@@ -90,14 +90,7 @@ function MemberTasks() {
                 console.log('All Tasks (after initial processing):', allTasks);
 
                 // Filter tasks based on assignedTo and createdBy (chief)
-                const filteredTasks = allTasks.filter(task =>
-                    task.assignedTo && Array.isArray(task.assignedTo) && task.assignedTo.length > 0 &&
-                    task.assignedTo[0]._id && task.assignedTo[0]._id.toString() === user.id &&
-                    task.createdBy && task.createdBy._id && task.createdBy._id.toString() === user.chief
-                );
-                console.log('Filtered Tasks:', filteredTasks);
-
-                setTasks(filteredTasks);
+                setTasks(allTasks);
                 toast.success('Tasks loaded successfully!');
             } catch (err) {
                 console.error('Error fetching tasks:', err);
@@ -108,7 +101,7 @@ function MemberTasks() {
             }
         };
 
-        if (token && user && user.chief) {
+        if (token && user) {
             fetchTasks();
         }
     }, [token, user]);
