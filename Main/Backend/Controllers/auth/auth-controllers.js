@@ -65,7 +65,7 @@ exports.login = async (req, res) => {
     console.log('Token generated.');
 
     console.log('Sending response...');
-    res.json({ token, user: { id: userId, role: userRole, chief: user.chief } });
+    res.json({ token, user: { id: userId, username: user.username, email: user.email, role: userRole, chief: user.chief } });
     console.log('Response sent successfully.');
   } catch (error) {
     console.error('Detailed error during login:', error);

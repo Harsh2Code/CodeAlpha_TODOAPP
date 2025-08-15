@@ -294,25 +294,26 @@ function ChiefTasks() {
                                 <span className="text-gray-400">Priority:</span>
                                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${task.priority === 'high' ? 'bg-red-900 text-red-300' : task.priority === 'medium' ? 'bg-yellow-900 text-yellow-300' : 'bg-green-900 text-green-300'}`}>{task.priority}</span>
                             </div>
-                            <div className="mt-4 pt-4 border-t border-gray-700">
-                                <h4 className="text-sm font-medium text-gray-300 mb-2">Assigned To:</h4>
-                                <div className="flex flex-wrap gap-2">
-                                    {task.assignedTo && task.assignedTo.length > 0 ? (
-                                        task.assignedTo.map(assignee => {
-                                            const assigneeId = typeof assignee === 'object' ? assignee._id : assignee;
-                                            const assigneeUser = users.find(u => u._id.toString() === assigneeId.toString());
-                                            const key = assigneeUser ? assigneeUser._id : assigneeId;
-                                            const textToDisplay = assigneeUser ? assigneeUser.username : assigneeId;
-
-                                            return (
+                            <div className='mb-0'>
+                                <div className="mb-0 pt-4 border-t border-gray-700 ">
+                                    <h4 className="text-sm font-medium text-gray-300 mb-2">Assigned To:</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {task.assignedTo && task.assignedTo.length > 0 ? (
+                                            task.assignedTo.map(assignee => {
+                                                const assigneeId = typeof assignee === 'object' ? assignee._id : assignee;
+                                                const assigneeUser = users.find(u => u._id.toString() === assigneeId.toString());
+                                                const key = assigneeUser ? assigneeUser._id : assigneeId;
+                                                const textToDisplay = assigneeUser ? assigneeUser.username : assigneeId;
+                                                return (
                                                 <span key={key} className="bg-blue-700 text-white text-xs px-2 py-1 rounded-full">
                                                     {textToDisplay}
                                                 </span>
                                             );
                                         })
-                                    ) : (
-                                        <span className="text-gray-500 text-xs">No one assigned</span>
-                                    )}
+                                        ) : (
+                                            <span className="text-gray-500 text-xs">No one assigned</span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

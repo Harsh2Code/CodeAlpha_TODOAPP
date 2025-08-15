@@ -4,17 +4,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../redux/authSlice';
 import NotificationDropdown from './NotificationDropdown';
 
-const getRoleBadgeColor = (role) => {
-  const colors = {
-    admin: 'bg-red-900/50 text-red-400 border-red-700',
-    chief: 'bg-blue-900/50 text-blue-400 border-blue-700',
-    leader: 'bg-green-900/50 text-green-400 border-green-700',
-    member: 'bg-gray-700/50 text-gray-400 border-gray-600'
-  };
-  return colors[role] || colors.member;
-};
+
 function Navbar() {
   const { user } = useSelector((state) => state.auth);
+  console.log('User object in Navbar:', user); // Added for debugging
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -39,11 +32,16 @@ function Navbar() {
       rolePrefix = 'member';
   }
 
-  const navigationItems = [
+  const navigationItems = user ? [
     { href: `/${rolePrefix}/dashboard`, label: 'Dashboard', icon: 'ri-dashboard-line' },
     { href: `/${rolePrefix}/projects`, label: 'Projects', icon: 'ri-folder-line' },
     { href: `/${rolePrefix}/teams`, label: 'Teams', icon: 'ri-team-line' },
     { href: `/${rolePrefix}/tasks`, label: 'Tasks', icon: 'ri-task-line' }
+  ] : [
+    { href: `/dashboard`, label: 'Dashboard', icon: 'ri-dashboard-line' },
+    { href: `/projects`, label: 'Projects', icon: 'ri-folder-line' },
+    { href: `/teams`, label: 'Teams', icon: 'ri-team-line' },
+    { href: `/tasks`, label: 'Tasks', icon: 'ri-task-line' }
   ];
 
   if (user?.role === 'admin') {
@@ -54,21 +52,13 @@ function Navbar() {
   //   navigationItems.push({ href: `/${rolePrefix}/analytics`, label: 'Analytics', icon: 'ri-bar-chart-line' });
   // }
 
-  const getRoleLabel = (role) => {
-    const labels = {
-      admin: 'Admin',
-      chief: 'Chief',
-      leader: 'Leader',
-      member: 'Member'
-    };
-    return labels[role] || 'Member';
-  };
+  
 
   return (
     <header className="bg-gray-800 border-b border-gray-700">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
-          <Link to={`/${rolePrefix}/dashboard`} className="text-2xl font-bold text-white font-['Pacifico']">
+          <Link to={user ? `/${rolePrefix}/dashboard` : '/dashboard'} className="text-2xl font-bold text-white font-['Pacifico']">
             logo
           </Link>
   
@@ -92,80 +82,88 @@ function Navbar() {
           </nav>
   
           <div className="flex items-center space-x-4">
-            <NotificationDropdown />
-  
-            <div className={`px-2 py-1 rounded-md text-xs border ${getRoleBadgeColor(role)}`} >
-              {getRoleLabel(role)}
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
-              >
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
-                  {user?.avatar || (user?.email ? user.email.charAt(0).toUpperCase() : '?')}
-                </div>
-                <div className="hidden sm:block text-left">
-                  <p className="text-white text-sm font-medium">{user?.username}</p>
-                  <p className="text-gray-400 text-xs">{user?.department || 'No Department'}</p>
-                </div>
-                <div className="w-4 h-4 flex items-center justify-center">
-                  <i className={`ri-arrow-down-s-line text-gray-400 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`}></i>
-                </div>
-              </button>
-  
-              {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 py-2 z-50">
-                  <div className="px-4 py-2 border-b border-gray-700">
-                    <p className="text-white text-sm font-medium">{user?.username}</p>
-                    <p className="text-gray-400 text-xs">{user?.email}</p>
-                    <div className={`inline-block px-2 py-1 rounded-md text-xs border mt-1 ${getRoleBadgeColor(role)}`}>
-                      {getRoleLabel(role)}
-                    </div>
-                  </div>
-                  
-                  <Link
-                    to={`/${rolePrefix}/profile`}
-                    className="block px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
-                    onClick={() => setShowProfileMenu(false)}
+            {user ? (
+              <>
+                <NotificationDropdown />
+                
+                <div className="relative">
+                  <button
+                    onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
                   >
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 flex items-center justify-center">
-                        <i className="ri-user-line"></i>
-                      </div>
-                      <span>Profile</span>
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                      {user?.username ? user.username.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : '?')}
                     </div>
-                  </Link>
-  
-                  <Link
-                    to={`/${rolePrefix}/settings`}
-                    className="block px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
-                    onClick={() => setShowProfileMenu(false)}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 flex items-center justify-center">
-                        <i className="ri-settings-line"></i>
-                      </div>
-                      <span>Settings</span>
+                    <div className="hidden sm:block text-left">
+                      <p className="text-white text-sm font-medium">{user?.username}</p>
+                      <p className="text-gray-400 text-xs">{user?.department || 'No Department'}</p>
                     </div>
-                  </Link>
-  
-                  <div className="border-t border-gray-700 mt-2">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-red-400 hover:text-red-300 hover:bg-gray-700 transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 flex items-center justify-center">
-                          <i className="ri-logout-box-line"></i>
+                    <div className="w-4 h-4 flex items-center justify-center">
+                      <i className={`ri-arrow-down-s-line text-gray-400 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`}></i>
+                    </div>
+                  </button>
+                  {showProfileMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 py-2 z-50">
+                      <div className="px-4 py-2 border-b border-gray-700">
+                        <p className="text-white text-sm font-medium">{user?.username}</p>
+                        <p className="text-gray-400 text-xs">{user?.email}</p>
+                        
+                      </div>
+                      <Link
+                        to={user ? `/${rolePrefix}/profile` : '/profile'}
+                        className="block px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                        onClick={() => setShowProfileMenu(false)}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 flex items-center justify-center">
+                            <i className="ri-user-line"></i>
+                          </div>
+                          <span>Profile</span>
                         </div>
-                        <span>Logout</span>
+                      </Link>
+                      <Link
+                        to={user ? `/${rolePrefix}/settings` : '/settings'}
+                        className="block px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                        onClick={() => setShowProfileMenu(false)}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 flex items-center justify-center">
+                            <i className="ri-settings-line"></i>
+                          </div>
+                          <span>Settings</span>
+                        </div>
+                      </Link>
+                      <div className="border-t border-gray-700 mt-2">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-red-400 hover:text-red-300 hover:bg-gray-700 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 flex items-center justify-center">
+                              <i className="ri-logout-box-line"></i>
+                            </div>
+                            <span>Logout</span>
+                          </div>
+                        </button>
                       </div>
-                    </button>
-                  </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Link to="/login">
+                <button className='btn btn-primary btn-outline px-8 '>
+                  Login
+                </button>
+                </Link>
+                <Link to="/register">
+                <button className='btn btn-accent btn-outline px-8 text-md text-[pacifictic]'>
+                  Register
+                </button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

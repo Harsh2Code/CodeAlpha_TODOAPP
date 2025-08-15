@@ -20,11 +20,20 @@ exports.createProject = async (req, res) => {
 exports.getProjects = async (req, res) => {
     try {
         console.log('req.user.id in getProjects:', req.user.id);
-        const projects = await Project.find({ chief: req.user.id });
-        console.log('Raw projects (before team population):', projects);
-        const populatedProjects = await Project.find({ chief: req.user.id }).populate('tasks').populate('team');
-        console.log('Projects fetched (with populated team):', populatedProjects);
-        res.status(200).json(populatedProjects);
+        const projects = await Project.find({ chief: req.user.id }).populate('tasks').populate('team');
+
+        const projectsWithCompletion = projects.map(project => {
+            const totalTasks = project.tasks.length;
+            const completedTasks = project.tasks.filter(task => task.status === 'completed').length;
+            const completionPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+            return {
+                ...project.toObject(), // Convert Mongoose document to plain object
+                completionPercentage: parseFloat(completionPercentage.toFixed(2)) // Format to 2 decimal places
+            };
+        });
+
+        console.log('Projects fetched (with populated team and completion percentage):', projectsWithCompletion);
+        res.status(200).json(projectsWithCompletion);
     } catch (error) {
         console.error('Error fetching projects:', error);
         res.status(500).json({ 
