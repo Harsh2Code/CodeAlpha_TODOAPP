@@ -3,7 +3,11 @@ import React from 'react';
 function Tasks() {
   return (
     <div className="min-h-screen bg-gray-900">
-      
+      <div role="alert" className="alert alert-warning alert-soft flex justify-between mt-0 rounded-tr-none rounded-tl-none">
+        <span className='ml-8'>You are at demo. for full access Register AND Login.</span>
+        <button className="btn btn-sm btn-primary mr-8" onClick={() => setShowModal(true)}>Add Chief</button>
+      </div>
+
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -17,7 +21,7 @@ function Tasks() {
             <span>New Task</span>
           </button>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
             <div className="flex items-center">
@@ -32,7 +36,7 @@ function Tasks() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-green-900 rounded-lg flex items-center justify-center">
@@ -46,7 +50,7 @@ function Tasks() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-yellow-900 rounded-lg flex items-center justify-center">
@@ -60,7 +64,7 @@ function Tasks() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-red-900 rounded-lg flex items-center justify-center">
@@ -75,7 +79,7 @@ function Tasks() {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-4 mb-6">
           <div className="flex bg-gray-800 rounded-lg shadow-sm border border-gray-700">
             <button className="px-4 py-2 text-sm font-medium rounded-l-lg transition-colors cursor-pointer whitespace-nowrap bg-blue-600 text-white">
@@ -92,7 +96,7 @@ function Tasks() {
             </button>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <div className="bg-gray-800 rounded-lg border-l-4 border-l-red-500 shadow-sm hover:shadow-md transition-shadow p-6 cursor-pointer border border-gray-700">
             <div className="flex items-start justify-between mb-4">
@@ -163,7 +167,7 @@ function Tasks() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg border-l-4 border-l-yellow-500 shadow-sm hover:shadow-md transition-shadow p-6 cursor-pointer border border-gray-700">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start space-x-4 flex-1">
@@ -230,7 +234,7 @@ function Tasks() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow p-6 cursor-pointer border border-gray-700">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start space-x-4 flex-1">
@@ -300,7 +304,7 @@ function Tasks() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg border-l-4 border-l-red-500 shadow-sm hover:shadow-md transition-shadow p-6 cursor-pointer border border-gray-700">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start space-x-4 flex-1">

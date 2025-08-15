@@ -3,7 +3,10 @@ import React from 'react';
 function Teams() {
   return (
     <div className="min-h-screen bg-gray-900">
-      
+      <div role="alert" className="alert alert-warning alert-soft flex justify-between mt-0 rounded-tr-none rounded-tl-none">
+        <span className='ml-8'>You are at demo. for full access Register AND Login.</span>
+        <button className="btn btn-sm btn-primary mr-8" onClick={() => setShowModal(true)}>Add Chief</button>
+      </div>
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -17,7 +20,7 @@ function Teams() {
             <span>Create Team</span>
           </button>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
             <div className="flex items-center">
@@ -32,7 +35,7 @@ function Teams() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-green-900 rounded-lg flex items-center justify-center">
@@ -46,7 +49,7 @@ function Teams() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-emerald-900 rounded-lg flex items-center justify-center">
@@ -60,7 +63,7 @@ function Teams() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-purple-900 rounded-lg flex items-center justify-center">
@@ -75,7 +78,7 @@ function Teams() {
             </div>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-700">
             <div className="flex items-start justify-between mb-4">
@@ -88,8 +91,8 @@ function Teams() {
                   Responsible for user interface development and user experience design
                 </p>
               </div>
-              <button 
-                className="p-2 text-gray-400 hover:text-blue-400 cursor-pointer transition-colors" 
+              <button
+                className="p-2 text-gray-400 hover:text-blue-400 cursor-pointer transition-colors"
                 title="Invite member"
               >
                 <div className="w-4 h-4 flex items-center justify-center">
@@ -97,7 +100,7 @@ function Teams() {
                 </div>
               </button>
             </div>
-            
+
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-300">Team Members</span>
@@ -124,7 +127,7 @@ function Teams() {
                 </div>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
               <div>
                 <div className="flex items-center space-x-2">
@@ -146,7 +149,7 @@ function Teams() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-700">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
@@ -158,8 +161,8 @@ function Teams() {
                   Server-side development, API design, and database management
                 </p>
               </div>
-              <button 
-                className="p-2 text-gray-400 hover:text-blue-400 cursor-pointer transition-colors" 
+              <button
+                className="p-2 text-gray-400 hover:text-blue-400 cursor-pointer transition-colors"
                 title="Invite member"
               >
                 <div className="w-4 h-4 flex items-center justify-center">
@@ -167,7 +170,7 @@ function Teams() {
                 </div>
               </button>
             </div>
-            
+
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-300">Team Members</span>
@@ -194,7 +197,7 @@ function Teams() {
                 </div>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
               <div>
                 <div className="flex items-center space-x-2">
@@ -216,7 +219,7 @@ function Teams() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-700">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
@@ -228,8 +231,8 @@ function Teams() {
                   Quality assurance, testing automation, and bug tracking
                 </p>
               </div>
-              <button 
-                className="p-2 text-gray-400 hover:text-blue-400 cursor-pointer transition-colors" 
+              <button
+                className="p-2 text-gray-400 hover:text-blue-400 cursor-pointer transition-colors"
                 title="Invite member"
               >
                 <div className="w-4 h-4 flex items-center justify-center">
@@ -237,7 +240,7 @@ function Teams() {
                 </div>
               </button>
             </div>
-            
+
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-300">Team Members</span>
@@ -258,7 +261,7 @@ function Teams() {
                 </div>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
               <div>
                 <div className="flex items-center space-x-2">
@@ -280,7 +283,7 @@ function Teams() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-700">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
@@ -292,8 +295,8 @@ function Teams() {
                   Product design, branding, and visual communications
                 </p>
               </div>
-              <button 
-                className="p-2 text-gray-400 hover:text-blue-400 cursor-pointer transition-colors" 
+              <button
+                className="p-2 text-gray-400 hover:text-blue-400 cursor-pointer transition-colors"
                 title="Invite member"
               >
                 <div className="w-4 h-4 flex items-center justify-center">
@@ -301,7 +304,7 @@ function Teams() {
                 </div>
               </button>
             </div>
-            
+
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-300">Team Members</span>
@@ -328,7 +331,7 @@ function Teams() {
                 </div>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
               <div>
                 <div className="flex items-center space-x-2">

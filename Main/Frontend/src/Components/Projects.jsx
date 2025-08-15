@@ -3,8 +3,9 @@ import React from 'react';
 function Projects() {
   return (
     <div className="min-h-screen bg-gray-900">
-      <div className="bg-yellow-500 text-white text-center p-2">
-        You are currently on a demo page.
+      <div role="alert" className="alert alert-warning alert-soft flex justify-between mt-0 rounded-tr-none rounded-tl-none">
+        <span className='ml-8'>You are at demo. for full access Register AND Login.</span>
+        <button className="btn btn-sm btn-primary mr-8" onClick={() => setShowModal(true)}>Add Chief</button>
       </div>
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-8">
@@ -19,7 +20,7 @@ function Projects() {
             <span>New Project</span>
           </button>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
             <div className="flex items-center">
@@ -34,7 +35,7 @@ function Projects() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-green-900 rounded-lg flex items-center justify-center">
@@ -48,7 +49,7 @@ function Projects() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-yellow-900 rounded-lg flex items-center justify-center">
@@ -63,7 +64,7 @@ function Projects() {
             </div>
           </div>
         </div>
-        
+
         <div className="mt-8 text-center">
           <p className="text-gray-400">
             No projects yet. Click "New Project" to get started.

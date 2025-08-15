@@ -102,7 +102,7 @@ function ChiefTeams() {
   };
 
   return (
-    <div className="p-6 w-5/6 mx-auto h-100">
+    <div className="p-6 min-h-screen w-5/6 mx-auto h-100">
       <Toaster richColors />
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-white">Teams</h1>
