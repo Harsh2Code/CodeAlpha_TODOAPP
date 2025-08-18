@@ -296,19 +296,22 @@ function ChiefTasks() {
                                 <div className="flex flex-wrap gap-2">
                                     {task.assignedTo && task.assignedTo.length > 0 ? (
                                         task.assignedTo.map(assignee => {
-                                            const assigneeId = typeof assignee === 'object' ? assignee._id : assignee;
-                                            const assigneeUser = users.find(u => u._id.toString() === assigneeId.toString());
-                                            const key = assigneeUser ? assigneeUser._id : assigneeId;
-                                            const textToDisplay = assigneeUser ? assigneeUser.username : assigneeId;
-
+                                            const assigneeUser = typeof assignee === 'object' ? assignee : users.find(u => u._id.toString() === assignee.toString());
+                                            const displayName = assigneeUser ? assigneeUser.username : 'Unknown User';
+                                            const userId = typeof assignee === 'object' ? assignee._id : assignee;
+                                            
                                             return (
-                                                <span key={key} className="bg-blue-700 text-white text-xs px-2 py-1 rounded-full">
-                                                    {textToDisplay}
+                                                <span 
+                                                    key={userId} 
+                                                    className="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-blue-700 transition-colors cursor-default"
+                                                    title={`Assigned to: ${displayName}`}
+                                                >
+                                                    {displayName}
                                                 </span>
                                             );
                                         })
                                     ) : (
-                                        <span className="text-gray-500 text-xs">No one assigned</span>
+                                        <span className="text-gray-500 text-xs italic">No one assigned</span>
                                     )}
                                 </div>
                             </div>

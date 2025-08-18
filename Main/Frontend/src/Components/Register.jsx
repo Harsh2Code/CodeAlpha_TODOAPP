@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RegisterUser } from '../redux/authSlice';
-import { toast } from 'sonner';
+import { Toaster, toast } from 'sonner';
 
 function Register() {
     const [formData, setFormData] = useState({
@@ -40,7 +40,6 @@ function Register() {
             }
         } catch (err) {
             // Error is handled by the useEffect hook watching the error state
-            console.error("Registration failed:", err);
         }
     }
 
@@ -63,6 +62,7 @@ function Register() {
 
     return (
         <div>
+            <Toaster />
             <div className="min-h-screen bg-gray-900 flex items-center justify-center py-12">
                 <div className="max-w-md w-full mx-4">
                     <div className="bg-gray-800 rounded-lg shadow-lg p-8 border border-gray-700">

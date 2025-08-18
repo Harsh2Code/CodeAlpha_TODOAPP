@@ -62,7 +62,7 @@ function MemberTeams() {
     }
 
     return (
-        <main className="max-w-7xl mx-auto px-6 py-8">
+        <main className="max-w-7xl min-h-screen mx-auto px-6 py-8">
             <Toaster richColors />
             <div className="flex items-center justify-between mb-8">
                 <div>

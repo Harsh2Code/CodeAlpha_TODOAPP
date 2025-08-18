@@ -329,7 +329,7 @@ function ChiefDashboard() {
 
     return (
         <div>
-            <main className="max-w-7xl mx-auto px-6 py-8">
+            <main className="max-w-7xl min-h-screen mx-auto px-6 py-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
                     <p className="text-gray-400">Welcome back! Here's what's happening with your projects.</p>

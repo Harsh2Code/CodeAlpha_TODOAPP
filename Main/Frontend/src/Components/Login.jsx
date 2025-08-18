@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginUser } from '../redux/authSlice';
+import { Toaster, toast } from 'sonner';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -10,21 +11,20 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // This useEffect can be used for other side effects related to user/token changes,
-    // but primary redirection after login is handled in handleSubmit.
-  }, [token, user, navigate]);
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { email, password } = formData;
     try {
       const resultAction = await dispatch(LoginUser({ email, password })).unwrap();
-      console.log('Login resultAction:', resultAction); // Log the entire resultAction
-      const loggedInUser = resultAction.user; // Assuming the user object is in resultAction.user
-      console.log('loggedInUser:', loggedInUser); // Log loggedInUser
+      const loggedInUser = resultAction.user;
 
       if (loggedInUser) {
-        console.log('loggedInUser.role:', loggedInUser.role); // Log the role
+        toast.success('Logged in successfully!');
         const role = loggedInUser.role?.toLowerCase();
         if (role === 'admin') {
           navigate('/admin/dashboard');
@@ -33,20 +33,17 @@ export default function Login() {
         } else if (role === 'member') {
           navigate('/member/dashboard');
         } else {
-          // Fallback for unexpected roles or if role is missing
-          console.log('Unknown role or role missing, navigating to default dashboard');
           navigate('/dashboard');
         }
-      } else {
-        console.log('loggedInUser is null or undefined. Redirection skipped.');
       }
     } catch (err) {
-      // error is handled by the redux state
+      // error is handled by the useEffect hook watching the error state
     }
   };
 
   return (
     <div>
+      <Toaster />
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="max-w-md w-full mx-4">
           <div className="bg-gray-800 rounded-lg shadow-lg p-8 border border-gray-700">
@@ -54,12 +51,6 @@ export default function Login() {
               <img src="/cha-bubbles-two-svgrepo-com.svg" alt="logo" className="w-12 mx-auto" />
               <p className="text-gray-400 mt-2">Sign in to your account</p>
             </div>
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg">
-                <p className="text-red-400 text-sm">{error}</p>
-              </div>
-            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>

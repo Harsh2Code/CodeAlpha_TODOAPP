@@ -26,6 +26,7 @@ import Unauthorized from './Components/Unauthorized'
 import Projects from './Components/Projects'
 import Tasks from './Components/Tasks'
 import Teams from './Components/Teams'
+import AddChief from './Components/AddChief'
 
 function App() {
   const { user } = useSelector((state) => state.auth)
@@ -65,6 +66,7 @@ function App() {
 
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={user ? <Admin /> : <Unauthorized />} />
+          <Route path="/admin/add-chief" element={user ? <AddChief /> : <Unauthorized />} />
           <Route path="/admin/profile" element={user ? <Profile /> : <Unauthorized />} />
           <Route path="/admin/settings" element={user ? <Settings /> : <Unauthorized />} />
 

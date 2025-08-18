@@ -1,34 +1,94 @@
 const Notification = require('../Models/Notification');
 const User = require('../Models/Users');
+const mongoose = require('mongoose');
 
 // Get all notifications for a user
-const getNotifications = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { page = 1, limit = 20, unread = false } = req.query;
+  const getNotifications = async (req, res) => {
+    try {
+      const userIdString = req.user.id;
+      
+      let userId;
+      try {
+        userId = new mongoose.Types.ObjectId(userIdString);
+      } catch (err) {
+        console.error('getNotifications: Error converting userId to ObjectId:', err);
+        return res.status(400).json({ message: 'Invalid User ID format.' });
+      }
 
-    const query = { userId };
-    if (unread === 'true') {
-      query.read = false;
+      const { page = 1, limit = 20, unread = false } = req.query;
+
+      const query = { userId };
+      if (unread === 'true') {
+        query.read = false;
+      }
+
+      // Fetch notifications with populated user details
+      const notifications = await Notification.find(query)
+        .sort({ createdAt: -1 })
+        .limit(limit * 1)
+        .skip((page - 1) * limit);
+
+      // Enhanced notifications with user details
+      const enhancedNotifications = await Promise.all(
+        notifications.map(async (notification) => {
+          const notificationObj = notification.toObject();
+          
+          // Replace user IDs with actual names in messages
+          let enhancedMessage = notification.message;
+          
+          // For task-related notifications, populate user details
+          if (notification.relatedModel === 'Task' && notification.relatedId) {
+            try {
+              const Task = require('../Models/Tasks');
+              const User = require('../Models/Users');
+              
+              const task = await Task.findById(notification.relatedId)
+                .populate('assignedTo', 'name username email')
+                .populate('createdBy', 'name username email');
+              
+              if (task) {
+                // Replace user IDs with names in messages
+                if (task.assignedTo && task.assignedTo.length > 0) {
+                  const assigneeNames = task.assignedTo.map(user => user.name || user.username).join(', ');
+                  enhancedMessage = enhancedMessage.replace(/\b[a-f\d]{24}\b/g, assigneeNames);
+                }
+                
+                if (task.createdBy && task.createdBy.name) {
+                  enhancedMessage = enhancedMessage.replace(/\b[a-f\d]{24}\b/g, task.createdBy.name);
+                }
+                
+                notificationObj.taskDetails = {
+                  title: task.title,
+                  assignedTo: task.assignedTo,
+                  createdBy: task.createdBy
+                };
+              }
+            } catch (error) {
+              console.error('Error populating task details:', error);
+            }
+          }
+          
+          // Ensure message contains user names instead of IDs
+          notificationObj.message = enhancedMessage;
+          notificationObj.displayMessage = enhancedMessage;
+          
+          return notificationObj;
+        })
+      );
+
+      const total = await Notification.countDocuments(query);
+
+      res.json({
+        notifications: enhancedNotifications,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+        total
+      });
+    } catch (error) {
+      console.error('getNotifications: Error:', error);
+      res.status(500).json({ message: error.message });
     }
-
-    const notifications = await Notification.find(query)
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
-
-    const total = await Notification.countDocuments(query);
-
-    res.json({
-      notifications,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-      total
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+  };
 
 // Mark notification as read
 const markAsRead = async (req, res) => {
@@ -83,10 +143,10 @@ const getUnreadCount = async (req, res) => {
 const createNotification = async (notificationData) => {
   try {
     const notification = new Notification(notificationData);
-    await notification.save();
-    return notification;
+    const savedNotification = await notification.save();
+    return savedNotification;
   } catch (error) {
-    console.error('Error creating notification:', error);
+    console.error('createNotification: Error creating notification:', error);
     throw error;
   }
 };
@@ -94,12 +154,12 @@ const createNotification = async (notificationData) => {
 // Notification service for different events
 const notificationService = {
   // Task completed notification
-  taskCompleted: async (task, userId) => {
+  taskCompleted: async (task, userId, completerUsername) => {
     return createNotification({
       userId,
       type: 'task_completed',
       title: 'Task Completed',
-      message: `${task.title} has been completed`,
+      message: `Task "${task.title}" completed by ${completerUsername}.`,
       priority: 'medium',
       relatedId: task._id,
       relatedModel: 'Task'

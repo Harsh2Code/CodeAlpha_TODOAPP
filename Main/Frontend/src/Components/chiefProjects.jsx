@@ -10,6 +10,41 @@ function ChiefProjects() {
     const { token, user } = useSelector((state) => state.auth);
     const [viewMode, setViewMode] = useState('grid');
     const navigate = useNavigate();
+    const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
+    const [newProject, setNewProject] = useState({
+        name: '',
+        description: '',
+        priority: 'medium',
+        teamId: ''
+    });
+    const [teams, setTeams] = useState([]);
+
+    useEffect(() => {
+        const fetchTeams = async () => {
+            try {
+                const response = await fetch('http://localhost:3001/api/chief/teams', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                setTeams(result);
+            } catch (error) {
+                console.error('Error fetching teams:', error);
+                setTeams([]);
+            }
+        };
+
+        if (token) {
+            fetchTeams();
+        }
+    }, [token]);
 
     useEffect(() => {
         const fetchDetailedProjects = async () => {
@@ -43,7 +78,6 @@ function ChiefProjects() {
                 }));
                 
                 setProjects(enhancedProjects);
-                toast.success('Projects loaded successfully!');
             } catch (err) {
                 console.error('Error fetching detailed projects:', err);
                 setError('Failed to load projects.');
@@ -57,6 +91,40 @@ function ChiefProjects() {
             fetchDetailedProjects();
         }
     }, [token, user]);
+
+    const handleCreateProject = async () => {
+        try {
+            const response = await fetch('http://localhost:3001/api/chief/projects', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(newProject)
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                console.error('Error creating project:', result);
+                toast.error(`Failed to create project: ${result.message || result.error}`);
+            } else {
+                setShowCreateProjectModal(false);
+                setNewProject({ name: '', description: '', priority: 'medium', teamId: '' });
+                toast.success('Project created successfully!');
+                // Refetch projects to update the list
+                const response = await fetch('http://localhost:3001/api/chief/projects', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const updatedProjects = await response.json();
+                setProjects(updatedProjects);
+            }
+        } catch (error) {
+            console.error('Error creating project:', error);
+            toast.error('An unexpected error occurred while creating the project.');
+        }
+    };
 
     const handleProjectClick = (projectId) => {
         navigate(`/chief/projects/${projectId}/tasks`);
@@ -118,7 +186,7 @@ function ChiefProjects() {
         : 0;
 
     return (
-        <main className="max-w-7xl mx-auto px-6 py-8">
+        <main className="max-w-7xl min-h-screen mx-auto px-6 py-8">
             <Toaster richColors />
             <div className="flex items-center justify-between mb-8">
                 <div>
@@ -140,7 +208,7 @@ function ChiefProjects() {
                             Flow View
                         </button>
                     </div>
-                    <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center space-x-2 cursor-pointer whitespace-nowrap transition-colors">
+                    <button onClick={() => setShowCreateProjectModal(true)} className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center space-x-2 cursor-pointer whitespace-nowrap transition-colors">
                         <div className="w-4 h-4 flex items-center justify-center">
                             <i className="ri-add-line"></i>
                         </div>
@@ -291,6 +359,74 @@ function ChiefProjects() {
                     ))
                 )}
             </div>
+            {showCreateProjectModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-gray-800 rounded-lg p-6 w-96 max-w-full mx-4 border border-gray-700">
+                        <h3 className="text-lg font-semibold mb-4 text-white">Create New Project</h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Project Name</label>
+                                <input
+                                    type="text"
+                                    value={newProject.name}
+                                    onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+                                    className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                                    placeholder="Enter project name"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Description</label>
+                                <textarea
+                                    value={newProject.description}
+                                    onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                                    className="w-full p-3 border border-gray-600 rounded-lg resize-none h-20 text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                                    placeholder="Enter project description"
+                                    maxLength={500}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Priority</label>
+                                <select
+                                    value={newProject.priority}
+                                    onChange={(e) => setNewProject({ ...newProject, priority: e.target.value })}
+                                    className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white focus:border-blue-500 focus:outline-none"
+                                >
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Team</label>
+                                <select
+                                    value={newProject.teamId}
+                                    onChange={(e) => setNewProject({ ...newProject, teamId: e.target.value })}
+                                    className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white focus:border-blue-500 focus:outline-none"
+                                >
+                                    <option value="">Select a team</option>
+                                    {teams.map((team) => (
+                                        <option key={team._id} value={team._id}>{team.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button
+                                onClick={() => setShowCreateProjectModal(false)}
+                                className="px-4 py-2 text-gray-400 hover:text-white cursor-pointer whitespace-nowrap transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleCreateProject}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer whitespace-nowrap transition-colors"
+                            >
+                                Create Project
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

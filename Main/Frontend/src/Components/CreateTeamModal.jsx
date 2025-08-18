@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { Toaster, toast } from 'sonner';
 
 function CreateTeamModal({ show, onClose, onTeamCreated }) {
     const [teamName, setTeamName] = useState('');
@@ -43,11 +44,12 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
             });
             const result = await response.json();
             if (response.ok) {
-                onTeamCreated(result);
-                onClose();
-                setTeamName('');
-                setSelectedMembers([]);
-            } else {
+                    onTeamCreated(result.team);
+                    onClose();
+                    setTeamName('');
+                    setSelectedMembers([]);
+                    toast.success("Team created successfully!");
+                } else {
                 console.error('Error creating team:', result);
             }
         } catch (error) {
@@ -74,24 +76,25 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-1">Members</label>
-                        <select
-                            multiple
-                            value={selectedMembers}
-                            onChange={(e) =>
-                                setSelectedMembers(
-                                    Array.from(e.target.options)
-                                        .filter((option) => option.selected)
-                                        .map((option) => option.value)
-                                )
-                            }
-                            className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white focus:border-blue-500 focus:outline-none h-32"
-                        >
+                        <div className="border border-gray-600 rounded-lg p-3 h-32 overflow-y-auto bg-gray-700">
                             {availableUsers.map((user) => (
-                                <option key={user._id} value={user._id}>
-                                    {user.username} ({user.email})
-                                </option>
+                                <div
+                                    key={user._id}
+                                    className={`flex items-center mb-2 p-2 rounded-lg cursor-pointer ${selectedMembers.includes(user._id) ? 'bg-green-500 bg-opacity-30' : ''}`}
+                                    onClick={() => {
+                                        if (selectedMembers.includes(user._id)) {
+                                            setSelectedMembers(selectedMembers.filter((id) => id !== user._id));
+                                        } else {
+                                            setSelectedMembers([...selectedMembers, user._id]);
+                                        }
+                                    }}
+                                >
+                                    <span className="text-white text-sm">
+                                        {user.username} ({user.email})
+                                    </span>
+                                </div>
                             ))}
-                        </select>
+                        </div>
                     </div>
                 </div>
                 <div className="flex justify-end space-x-3 mt-6">

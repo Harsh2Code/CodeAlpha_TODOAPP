@@ -1,6 +1,7 @@
 const Task = require('../../Models/Tasks');
 const User = require('../../Models/Users');
 const mongoose = require('mongoose'); // Import mongoose
+const { notificationService } = require('../../Controllers/notificationController');
 
 exports.getMemberTasks = async (req, res) => {
     try {
@@ -82,7 +83,7 @@ exports.getProjectTasksForMember = async (req, res) => {
 exports.markTaskAsComplete = async (req, res) => {
     try {
         const taskId = req.params.id;
-        const task = await Task.findById(taskId);
+        const task = await Task.findById(taskId).populate('createdBy', 'username'); // Populate createdBy to get Chief's username
 
         if (!task) {
             return res.status(404).json({ message: "Task not found." });
@@ -90,6 +91,15 @@ exports.markTaskAsComplete = async (req, res) => {
 
         task.status = 'completed';
         await task.save();
+
+        // Notify the Chief (task creator)
+        if (task.createdBy && task.createdBy._id) {
+            const chiefId = task.createdBy._id;
+            const chiefUser = await User.findById(chiefId);
+            const chiefName = chiefUser ? chiefUser.username : 'Unknown Chief';
+
+                    await notificationService.taskCompleted(task, new mongoose.Types.ObjectId(task.createdBy._id), req.user.username);
+        }
 
         res.status(200).json({ message: "Task marked as completed successfully!", task });
     } catch (error) {

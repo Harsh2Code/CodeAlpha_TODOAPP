@@ -1,6 +1,8 @@
 const Project = require('../../Models/Projects');
 const Task = require('../../Models/Tasks');
 const mongoose = require('mongoose'); // Import mongoose
+const User = require('../../Models/Users'); // Import User model
+const { notificationService } = require('../../Controllers/notificationController');
 
 exports.createProject = async (req, res) => {
     const { name, description, priority, teamId } = req.body;

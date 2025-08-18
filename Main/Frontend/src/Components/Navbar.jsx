@@ -69,14 +69,17 @@ function Navbar() {
                 to={item.href}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
                   pathname === item.href
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                    ? 'text-white'
+                    : 'text-gray-300 '
                 }`}
               >
+                <button className='btn btn-ghost'>
                 <div className="w-4 h-4 flex items-center justify-center">
                   <i className={item.icon}></i>
                 </div>
+
                 <span>{item.label}</span>
+                </button>
               </Link>
             ))}
           </nav>
@@ -94,6 +97,11 @@ function Navbar() {
                     <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
                       {user?.username ? user.username.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : '?')}
                     </div>
+                    {user?.role && (
+                      <span className="bg-blue-900 bg-opacity-50 text-blue-300 text-xs px-2 py-1 rounded-full ml-2">
+                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      </span>
+                    )}
                     <div className="hidden sm:block text-left">
                       <p className="text-white text-sm font-medium">{user?.username}</p>
                       <p className="text-gray-400 text-xs">{user?.department || 'No Department'}</p>

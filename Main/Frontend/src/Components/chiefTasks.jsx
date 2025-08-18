@@ -38,9 +38,6 @@ function ChiefTasks() {
                     throw new Error(`HTTP error! status: ${response.status}, Details: ${errorData.message || JSON.stringify(errorData)}`);
                 }
                 const result = await response.json();
-                console.log('Tasks fetched from backend:', result);
-                console.log('Tasks array length:', Array.isArray(result) ? result.length : 'Not an array');
-                console.log('Tasks data structure:', result);
                 setTasks(Array.isArray(result) ? result : []);
             } catch (err) {
                 console.error('Error fetching tasks:', err);
@@ -71,16 +68,15 @@ function ChiefTasks() {
                 }
                 const result = await response.json();
                 setUsers(result);
-                console.log('Fetched Users:', result); // Debugging
             } catch (err) {
                 console.error('Error fetching all users:', err);
-                setError(err.message || 'Failed to load users.'); // Add setError here
+                setError(err.message || 'Failed to load users.');
             }
         };
-        if (token) { // This line was missing
-            fetchAllUsers(); // This line was missing
-        } // This line was missing
-    }, [token]); // This line was missing
+        if (token) {
+            fetchAllUsers();
+        }
+    }, [token]);
 
     // Fetch all teams
     useEffect(() => {
@@ -98,10 +94,9 @@ function ChiefTasks() {
                 }
                 const result = await response.json();
                 setTeams(result);
-                console.log('Fetched Teams:', result); // Debugging
             } catch (err) {
                 console.error('Error fetching teams:', err);
-                setError(err.message || 'Failed to load teams.'); // Add setError here
+                setError(err.message || 'Failed to load teams.');
             }
         };
 
@@ -126,10 +121,9 @@ function ChiefTasks() {
                 }
                 const result = await response.json();
                 setProjects(result);
-                console.log('Fetched Projects:', result); // Debugging
             } catch (err) {
                 console.error('Error fetching projects:', err);
-                setError(err.message || 'Failed to load projects.'); // Add setError here
+                setError(err.message || 'Failed to load projects.');
             }
         };
 
@@ -143,41 +137,31 @@ function ChiefTasks() {
         if (selectedProjectId && projects.length > 0) {
             const project = projects.find(p => p._id === selectedProjectId);
             if (project && project.team) {
-                console.log('Project found with team:', project);
-                console.log('Project team ID:', project.team._id);
                 
                 // Handle both direct team reference and populated team object
                 const teamId = typeof project.team === 'string' ? project.team : project.team._id;
                 const team = teams.find(t => t._id === teamId);
                 
                 if (team && team.members && team.members.length > 0) {
-                    console.log('Team found with members:', team);
                     
                     // Handle both populated and unpopulated member objects
                     const teamMemberIds = team.members.map(member => {
                         return typeof member === 'string' ? member : member._id;
                     });
                     
-                    console.log('Team member IDs:', teamMemberIds);
-                    console.log('All users:', users);
-                    
                     const membersOfSelectedTeam = users.filter(user => {
                         const userId = user._id.toString();
                         return teamMemberIds.some(memberId => memberId.toString() === userId);
                     });
                     
-                    console.log('Filtered assignable members:', membersOfSelectedTeam);
                     setAssignableMembers(membersOfSelectedTeam);
                 } else {
-                    console.log('Team not found or no members in team');
                     setAssignableMembers([]);
                 }
             } else {
-                console.log('Project found but no team associated');
                 setAssignableMembers([]);
             }
         } else {
-            console.log('No project selected or no projects available');
             setAssignableMembers([]);
         }
     }, [selectedProjectId, projects, teams, users]);
@@ -203,7 +187,7 @@ function ChiefTasks() {
             if (!response.ok) {
                 throw new Error(result.message || 'Failed to create task');
             }
-            setTasks((prevTasks) => [...prevTasks, result.task]); // Assuming backend returns the created task
+            setTasks((prevTasks) => [...prevTasks, result.task]);
             toast.success('Task created successfully!');
             setNewTask({
                 title: '',
@@ -252,7 +236,7 @@ function ChiefTasks() {
     }
 
     return (
-        <main className="max-w-7xl mx-auto px-6 py-8">
+        <main className="max-w-7xl min-h-screen mx-auto px-6 py-8">
             <Toaster richColors />
             <div className="flex items-center justify-between mb-8">
                 <div>
@@ -295,23 +279,27 @@ function ChiefTasks() {
                                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${task.priority === 'high' ? 'bg-red-900 text-red-300' : task.priority === 'medium' ? 'bg-yellow-900 text-yellow-300' : 'bg-green-900 text-green-300'}`}>{task.priority}</span>
                             </div>
                             <div className='mb-0'>
-                                <div className="mb-0 pt-4 border-t border-gray-700 ">
+                                <div className="mb-0 pt-4 border-t border-gray-700">
                                     <h4 className="text-sm font-medium text-gray-300 mb-2">Assigned To:</h4>
                                     <div className="flex flex-wrap gap-2">
                                         {task.assignedTo && task.assignedTo.length > 0 ? (
                                             task.assignedTo.map(assignee => {
-                                                const assigneeId = typeof assignee === 'object' ? assignee._id : assignee;
-                                                const assigneeUser = users.find(u => u._id.toString() === assigneeId.toString());
-                                                const key = assigneeUser ? assigneeUser._id : assigneeId;
-                                                const textToDisplay = assigneeUser ? assigneeUser.username : assigneeId;
+                                                const assigneeUser = typeof assignee === 'object' ? assignee : users.find(u => u._id.toString() === assignee.toString());
+                                                const displayName = assigneeUser ? assigneeUser.username : 'Unknown User';
+                                                const userId = typeof assignee === 'object' ? assignee._id : assignee;
+                                                
                                                 return (
-                                                <span key={key} className="bg-blue-700 text-white text-xs px-2 py-1 rounded-full">
-                                                    {textToDisplay}
-                                                </span>
-                                            );
-                                        })
+                                                    <span 
+                                                        key={userId} 
+                                                        className="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-blue-700 transition-colors cursor-default"
+                                                        title={`Assigned to: ${displayName}`}
+                                                    >
+                                                        {displayName}
+                                                    </span>
+                                                );
+                                            })
                                         ) : (
-                                            <span className="text-gray-500 text-xs">No one assigned</span>
+                                            <span className="text-gray-500 text-xs italic">No one assigned</span>
                                         )}
                                     </div>
                                 </div>
@@ -392,7 +380,7 @@ function ChiefTasks() {
                                     value={newTask.assignedTo}
                                     onChange={handleAssignedToChange}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white focus:border-blue-500 focus:outline-none h-32"
-                                >
+>
                                     {assignableMembers.length === 0 ? (
                                         <option value="" disabled>Select a project to see assignable members</option>
                                     ) : (

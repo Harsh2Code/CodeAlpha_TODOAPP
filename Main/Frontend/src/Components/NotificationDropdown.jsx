@@ -12,7 +12,9 @@ const NotificationDropdown = () => {
 
   // Fetch notifications and unread count
   const fetchNotifications = async () => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
     
     setLoading(true);
     try {
@@ -22,14 +24,16 @@ const NotificationDropdown = () => {
       });
       setNotifications(response.data.notifications);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error('Error fetching notifications:', error.response ? error.response.data : error.message);
     } finally {
       setLoading(false);
     }
   };
 
   const fetchUnreadCount = async () => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
     
     try {
       const token = localStorage.getItem('token');
@@ -38,7 +42,7 @@ const NotificationDropdown = () => {
       });
       setUnreadCount(response.data.count);
     } catch (error) {
-      console.error('Error fetching unread count:', error);
+      console.error('Error fetching unread count:', error.response ? error.response.data : error.message);
     }
   };
 
@@ -58,7 +62,9 @@ const NotificationDropdown = () => {
       task_pending: 'ri-loader-4-line',
       task_running_late: 'ri-alert-line',
       project_created: 'ri-folder-line',
-      team_invitation: 'ri-team-line'
+      team_invitation: 'ri-team-line',
+      task_assigned_by_chief: 'ri-send-plane-line',
+      task_completed_notification: 'ri-checkbox-circle-fill'
     };
     return icons[type] || 'ri-notification-3-line';
   };
@@ -72,9 +78,47 @@ const NotificationDropdown = () => {
       task_pending: 'text-yellow-500',
       task_running_late: 'text-orange-500',
       project_created: 'text-indigo-500',
-      team_invitation: 'text-pink-500'
+      team_invitation: 'text-pink-500',
+      task_assigned_by_chief: 'text-purple-500',
+      task_completed_notification: 'text-green-500'
     };
     return colors[type] || 'text-gray-500';
+  };
+
+  const formatNotificationMessage = (notification) => {
+    // If task details are available, enhance the message with user names
+    if (notification.taskDetails) {
+      const { taskDetails } = notification;
+      
+      switch (notification.type) {
+        case 'task_assigned':
+          if (taskDetails.assignedTo && taskDetails.assignedTo.length > 0) {
+            const assigneeNames = taskDetails.assignedTo.map(user => user.name || user.username).join(', ');
+            return `Task "${taskDetails.title}" assigned to ${assigneeNames}`;
+          }
+          break;
+          
+        case 'task_assigned_by_chief':
+          if (taskDetails.assignedTo && taskDetails.assignedTo.length > 0) {
+            const assigneeNames = taskDetails.assignedTo.map(user => user.name || user.username).join(', ');
+            return `You assigned task: ${taskDetails.title} to ${assigneeNames}`;
+          }
+          break;
+          
+        case 'task_completed':
+          if (taskDetails.createdBy && taskDetails.createdBy.name) {
+            return `Task "${taskDetails.title}" completed by ${taskDetails.createdBy.name}`;
+          }
+          break;
+          
+        default:
+          // For other types, return the original message
+          return notification.message;
+      }
+    }
+    
+    // Return original message if no enhancement is needed
+    return notification.message;
   };
 
   const getPriorityBadge = (priority) => {
@@ -191,7 +235,7 @@ const NotificationDropdown = () => {
                         </span>
                       </div>
                       <p className="text-sm text-gray-400 mt-1">
-                        {notification.message}
+                        {formatNotificationMessage(notification)}
                       </p>
                       <p className="text-xs text-gray-500 mt-2">
                         {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}

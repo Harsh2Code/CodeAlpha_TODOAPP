@@ -116,15 +116,11 @@ exports.getDashboard = async (req, res) => {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 5)
       .map(task => {
-        const assignedUser = task.assignedTo && task.assignedTo.length > 0 ? task.assignedTo[0] : null;
-        const userName = assignedUser ? assignedUser.username : 'N/A';
-        const userInitial = assignedUser ? assignedUser.username.charAt(0).toUpperCase() : 'N/A';
-
         return {
           id: task._id,
           user: {
-            name: userName,
-            initial: userInitial
+            name: req.user.username,
+            initial: req.user.username.charAt(0).toUpperCase()
           },
           action: `created task`,
           target: task.title,
@@ -153,10 +149,10 @@ exports.getUsers = async (req, res) => {
   try {
     const chiefId = req.user.id;
 
-    // Find all users with the 'Member' role, excluding the chief themselves
+    // Find all users with the 'Member' role who are assigned to the current chief
     const users = await User.find({
       role: 'Member',
-      _id: { $ne: chiefId } 
+      chief: chiefId
     }, '_id username email role');
 
     res.json(users);
