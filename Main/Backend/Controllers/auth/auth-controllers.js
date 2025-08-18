@@ -42,7 +42,7 @@ exports.login = async (req, res) => {
     }
     console.log('User found:', user);
 
-    console.log('Comparing passwords...');
+  
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       console.log('Password mismatch for email:', email);
