@@ -64,8 +64,19 @@ exports.login = async (req, res) => {
     const token = jwt.sign({ id: userId, role: userRole }, process.env.JWT_SECRET, { expiresIn: '1h' });
     console.log('Token generated.');
 
-    console.log('Sending response...');
-    res.json({ token, user: { id: userId, username: user.username, email: user.email, role: userRole, chief: user.chief } });
+    const responseBody = {
+      token,
+      user: {
+        id: userId,
+        username: user.username || '',
+        email: user.email || '',
+        role: userRole,
+        chief: user.chief || null,
+      },
+    };
+
+    console.log('Sending response... Body:', JSON.stringify(responseBody, null, 2));
+    res.json(responseBody);
     console.log('Response sent successfully.');
   } catch (error) {
     console.error('Detailed error during login:', error);
