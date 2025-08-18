@@ -15,7 +15,7 @@ export const LoginUser = createAsyncThunk(
   'auth/loginUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ export const RegisterUser = createAsyncThunk(
   'auth/registerUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

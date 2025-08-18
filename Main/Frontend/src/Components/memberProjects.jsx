@@ -14,7 +14,7 @@ function MemberProjects() {
     useEffect(() => {
         const fetchDetailedProjects = async () => {
             try {
-                const response = await fetch('/api/member/projects/detailed', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/projects/detailed', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'

@@ -8,7 +8,7 @@ function Admin() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('/api/admin/dashboard', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/admin/dashboard', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

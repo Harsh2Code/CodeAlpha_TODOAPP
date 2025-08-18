@@ -13,7 +13,7 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
             // Fetch all users to select as members
             const fetchUsers = async () => {
                 try {
-                    const response = await fetch('/api/chief/users', {
+                    const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/users', {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
@@ -31,7 +31,7 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
 
     const handleCreateTeam = async () => {
         try {
-            const response = await fetch('/api/chief/teams', {
+            const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/teams', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

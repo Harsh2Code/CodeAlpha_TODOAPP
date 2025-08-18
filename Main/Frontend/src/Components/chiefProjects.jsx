@@ -22,7 +22,7 @@ function ChiefProjects() {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const response = await fetch('http://localhost:3001/api/chief/teams', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/teams', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -49,7 +49,7 @@ function ChiefProjects() {
     useEffect(() => {
         const fetchDetailedProjects = async () => {
             try {
-                const response = await fetch('/api/chief/projects', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/projects', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -94,7 +94,7 @@ function ChiefProjects() {
 
     const handleCreateProject = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/chief/projects', {
+            const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/projects', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ function ChiefProjects() {
                 setNewProject({ name: '', description: '', priority: 'medium', teamId: '' });
                 toast.success('Project created successfully!');
                 // Refetch projects to update the list
-                const response = await fetch('http://localhost:3001/api/chief/projects', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/projects', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'

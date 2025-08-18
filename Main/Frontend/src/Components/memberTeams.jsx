@@ -11,7 +11,7 @@ function MemberTeams() {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const apiUrl = '/api/member/teams';
+                const apiUrl = import.meta.env.VITE_APP_API_URL + '/api/member/teams';
                 console.log('Fetching teams from URL:', apiUrl); // Add this line
                 const response = await fetch(apiUrl, {
                     headers: {

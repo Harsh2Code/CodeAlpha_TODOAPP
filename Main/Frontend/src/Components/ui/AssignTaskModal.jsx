@@ -18,7 +18,7 @@ const AssignTaskModal = ({ member, onClose, onAssignTask }) => {
     const fetchProjects = async () => {
       try {
         // Replace with your actual API endpoint for fetching chief's projects
-        const response = await fetch('/api/chief/projects', {
+        const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/projects', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },

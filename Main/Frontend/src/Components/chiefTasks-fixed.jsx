@@ -27,7 +27,7 @@ function ChiefTasks() {
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const response = await fetch('/api/chief/tasks', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/tasks', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -59,7 +59,7 @@ function ChiefTasks() {
     useEffect(() => {
         const fetchAllUsers = async () => {
             try {
-                const response = await fetch('/api/chief/users', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/users', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -86,7 +86,7 @@ function ChiefTasks() {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const response = await fetch('/api/chief/teams', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/teams', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -114,7 +114,7 @@ function ChiefTasks() {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const response = await fetch('/api/chief/projects', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/projects', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -188,7 +188,7 @@ function ChiefTasks() {
                 return;
             }
 
-            const response = await fetch('/api/chief/tasks/assign', {
+            const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/tasks/assign', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

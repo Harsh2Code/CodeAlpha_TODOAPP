@@ -14,7 +14,7 @@ function MemberDashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('/api/member/dashboard', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/dashboard', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -30,7 +30,7 @@ function MemberDashboard() {
 
         const fetchMemberProjects = async () => {
             try {
-                const response = await fetch('/api/member/projects', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/projects', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -45,7 +45,7 @@ function MemberDashboard() {
         // New fetch function for chief tasks
         const fetchChiefTasks = async () => {
             try {
-                const response = await fetch('/api/member/tasks', { // This is the new endpoint
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/tasks', { // This is the new endpoint
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -59,7 +59,7 @@ function MemberDashboard() {
 
         const fetchChiefActivity = async () => {
             try {
-                const response = await fetch('http://localhost:3001/api/member/chief-activity', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/chief-activity', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -86,7 +86,7 @@ function MemberDashboard() {
 
     const handleAddChief = async () => {
         try {
-            const response = await fetch('/api/member/chief', {
+            const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/chief', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

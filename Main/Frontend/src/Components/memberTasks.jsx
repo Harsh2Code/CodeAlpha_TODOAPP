@@ -10,7 +10,7 @@ function MemberTasks() {
 
     const updateProjectProgress = async (projectId) => {
         try {
-            const response = await fetch(`/api/member/projects/${projectId}/progress`, {
+            const response = await fetch(import.meta.env.VITE_APP_API_URL + `/api/member/projects/${projectId}/progress`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -32,7 +32,7 @@ function MemberTasks() {
 
     const markTaskAsDone = async (taskId) => {
         try {
-            const response = await fetch(`/api/member/tasks/${taskId}/complete`, {
+            const response = await fetch(import.meta.env.VITE_APP_API_URL + `/api/member/tasks/${taskId}/complete`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -73,7 +73,7 @@ function MemberTasks() {
 
         const fetchTasks = async () => {
             try {
-                const response = await fetch('/api/member/tasks', {
+                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/tasks', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
