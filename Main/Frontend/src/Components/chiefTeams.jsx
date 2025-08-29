@@ -105,7 +105,8 @@ function ChiefTeams() {
         console.error('Failed to assign task:', data.message);
         toast.error(`Failed to assign task: ${data.message}`);
         // Optionally, show an error message
-      } catch (error) {
+      }
+    } catch (error) {
       console.error('Error assigning task:', error);
       toast.error('Error assigning task.');
     }
