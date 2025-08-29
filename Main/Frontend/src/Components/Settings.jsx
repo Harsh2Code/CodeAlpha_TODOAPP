@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Toaster, toast } from 'sonner';
+import { getBackendUrl } from '../api';
 
 function Settings() {
   const { user, token } = useSelector((state) => state.auth);
@@ -9,11 +10,21 @@ function Settings() {
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [username, setUsername] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [backendUrl, setBackendUrl] = useState('');
+
+  useEffect(() => {
+    const setUrl = async () => {
+        const url = await getBackendUrl();
+        setBackendUrl(url);
+    };
+    setUrl();
+  }, []);
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
+    if (!backendUrl) return;
     try {
-      const response = await fetch('http://localhost:3001/api/auth/profile', {
+      const response = await fetch(`${backendUrl}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -39,8 +50,9 @@ function Settings() {
       toast.error('New passwords do not match.');
       return;
     }
+    if (!backendUrl) return;
     try {
-      const response = await fetch('http://localhost:3001/api/auth/change-password', {
+      const response = await fetch(`${backendUrl}/api/auth/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

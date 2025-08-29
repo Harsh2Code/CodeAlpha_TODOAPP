@@ -1,10 +1,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { getBackendUrl } from '../api';
 
 function EditTeamModal({ show, onClose, team, onTeamUpdated }) {
     const [members, setMembers] = useState([]);
     const { token, user } = useSelector((state) => state.auth);
+    const [backendUrl, setBackendUrl] = useState('');
+
+    useEffect(() => {
+        const setUrl = async () => {
+            const url = await getBackendUrl();
+            setBackendUrl(url);
+        };
+        setUrl();
+    }, []);
 
     useEffect(() => {
         console.log('EditTeamModal team prop:', team);
@@ -14,8 +24,9 @@ function EditTeamModal({ show, onClose, team, onTeamUpdated }) {
     }, [show, team]);
 
     const handleRemoveMember = async (memberId) => {
+        if (!backendUrl) return;
         try {
-            const response = await fetch(`/api/chief/teams/${team._id}/members/${memberId}`, {
+            const response = await fetch(`${backendUrl}/api/chief/teams/${team._id}/members/${memberId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -34,8 +45,9 @@ function EditTeamModal({ show, onClose, team, onTeamUpdated }) {
     };
 
     const handlePromoteMember = async (memberId) => {
+        if (!backendUrl) return;
         try {
-            const response = await fetch(`http://localhost:3001/api/chief/teams/${team._id}/members/${memberId}/promote`, {
+            const response = await fetch(`${backendUrl}/api/chief/teams/${team._id}/members/${memberId}/promote`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`

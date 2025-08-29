@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Toaster, toast } from 'sonner';
+import { getBackendUrl } from '../api';
 
 function MemberTeams() {
     const [teams, setTeams] = useState([]);
@@ -11,7 +12,8 @@ function MemberTeams() {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const apiUrl = import.meta.env.VITE_APP_API_URL + '/api/member/teams';
+                const backendUrl = await getBackendUrl();
+                const apiUrl = `${backendUrl}/api/member/teams`;
                 console.log('Fetching teams from URL:', apiUrl); // Add this line
                 const response = await fetch(apiUrl, {
                     headers: {

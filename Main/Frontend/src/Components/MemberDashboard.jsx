@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
+import { getBackendUrl } from '../api';
 
 function MemberDashboard() {
     const [data, setData] = useState(null);
@@ -14,7 +15,8 @@ function MemberDashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/dashboard', {
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/member/dashboard`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -30,7 +32,8 @@ function MemberDashboard() {
 
         const fetchMemberProjects = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/projects', {
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/member/projects`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -45,7 +48,8 @@ function MemberDashboard() {
         // New fetch function for chief tasks
         const fetchChiefTasks = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/tasks', { // This is the new endpoint
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/member/tasks`, { // This is the new endpoint
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -59,7 +63,8 @@ function MemberDashboard() {
 
         const fetchChiefActivity = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/chief-activity', {
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/member/chief-activity`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -86,7 +91,8 @@ function MemberDashboard() {
 
     const handleAddChief = async () => {
         try {
-            const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/chief', {
+            const backendUrl = await getBackendUrl();
+            const response = await fetch(`${backendUrl}/api/member/chief`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

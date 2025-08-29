@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux'; // Import useDispatch
 import { Toaster, toast } from 'sonner';
 import { updateUserChief } from '../redux/authSlice'; // Import updateUserChief
+import { getBackendUrl } from '../api';
 
 function Profile() {
   const { user, token } = useSelector((state) => state.auth);
@@ -9,11 +10,21 @@ function Profile() {
   const [profile, setProfile] = useState(null);
   const [chiefEmail, setChiefEmail] = useState(''); // State for chief email input
   const [loadingChiefAssignment, setLoadingChiefAssignment] = useState(false); // State for loading
+  const [backendUrl, setBackendUrl] = useState('');
+
+  useEffect(() => {
+    const setUrl = async () => {
+        const url = await getBackendUrl();
+        setBackendUrl(url);
+    };
+    setUrl();
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!backendUrl) return;
       try {
-        const response = await fetch('http://localhost:3001/api/auth/profile', {
+        const response = await fetch(`${backendUrl}/api/auth/profile`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -32,19 +43,20 @@ function Profile() {
       }
     };
 
-    if (token) {
+    if (token && backendUrl) {
       fetchProfile();
     }
-  }, [token]);
+  }, [token, backendUrl]);
 
   const assignChief = async () => {
     if (!chiefEmail) {
       toast.error('Please enter a chief\'s email.');
       return;
     }
+    if (!backendUrl) return;
     setLoadingChiefAssignment(true);
     try {
-      const response = await fetch('http://localhost:3001/api/member/chief', {
+      const response = await fetch(`${backendUrl}/api/member/chief`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -70,6 +82,7 @@ function Profile() {
       setLoadingChiefAssignment(false);
     }
   };
+
 
 
   if (!user || !profile) {

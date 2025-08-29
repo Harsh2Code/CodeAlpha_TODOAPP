@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { formatDistanceToNow } from 'date-fns';
 import axios from 'axios';
+import { getBackendUrl } from '../api';
 
 const NotificationDropdown = () => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -9,17 +10,26 @@ const NotificationDropdown = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const { user } = useSelector((state) => state.auth);
+  const [backendUrl, setBackendUrl] = useState('');
+
+  useEffect(() => {
+    const setUrl = async () => {
+        const url = await getBackendUrl();
+        setBackendUrl(url);
+    };
+    setUrl();
+  }, []);
 
   // Fetch notifications and unread count
   const fetchNotifications = async () => {
-    if (!user) {
+    if (!user || !backendUrl) {
       return;
     }
     
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/notifications', {
+      const response = await axios.get(`${backendUrl}/api/notifications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNotifications(response.data.notifications);
@@ -31,13 +41,13 @@ const NotificationDropdown = () => {
   };
 
   const fetchUnreadCount = async () => {
-    if (!user) {
+    if (!user || !backendUrl) {
       return;
     }
     
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/notifications/unread-count', {
+      const response = await axios.get(`${backendUrl}/api/notifications/unread-count`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUnreadCount(response.data.count);
@@ -47,11 +57,11 @@ const NotificationDropdown = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && backendUrl) {
       fetchNotifications();
       fetchUnreadCount();
     }
-  }, [user]);
+  }, [user, backendUrl]);
 
   const getNotificationIcon = (type) => {
     const icons = {
@@ -132,9 +142,10 @@ const NotificationDropdown = () => {
   };
 
   const markAsRead = async (id) => {
+    if (!backendUrl) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:3001/api/notifications/${id}/read`, {}, {
+      await axios.put(`${backendUrl}/api/notifications/${id}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -151,9 +162,10 @@ const NotificationDropdown = () => {
   };
 
   const markAllAsRead = async () => {
+    if (!backendUrl) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.put('http://localhost:3001/api/notifications/read-all', {}, {
+      await axios.put(`${backendUrl}/api/notifications/read-all`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       

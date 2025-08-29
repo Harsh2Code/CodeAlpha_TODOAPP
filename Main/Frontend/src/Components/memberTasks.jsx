@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Toaster, toast } from 'sonner';
+import { getBackendUrl } from '../api';
 
 function MemberTasks() {
     const [tasks, setTasks] = useState([]);
@@ -10,7 +11,8 @@ function MemberTasks() {
 
     const updateProjectProgress = async (projectId) => {
         try {
-            const response = await fetch(import.meta.env.VITE_APP_API_URL + `/api/member/projects/${projectId}/progress`, {
+            const backendUrl = await getBackendUrl();
+            const response = await fetch(`${backendUrl}/api/member/projects/${projectId}/progress`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -32,7 +34,8 @@ function MemberTasks() {
 
     const markTaskAsDone = async (taskId) => {
         try {
-            const response = await fetch(import.meta.env.VITE_APP_API_URL + `/api/member/tasks/${taskId}/complete`, {
+            const backendUrl = await getBackendUrl();
+            const response = await fetch(`${backendUrl}/api/member/tasks/${taskId}/complete`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,

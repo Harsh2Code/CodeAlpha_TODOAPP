@@ -4,6 +4,7 @@ import CreateTeamModal from './CreateTeamModal';
 import AssignTaskModal from './AssignTaskModal';
 import { useSelector } from 'react-redux';
 import { Toaster, toast } from 'sonner';
+import { getBackendUrl } from '../api';
 
 function ChiefTeams() {
   const [teams, setTeams] = useState([]);
@@ -11,12 +12,21 @@ function ChiefTeams() {
   const [showAssignTaskModal, setShowAssignTaskModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const { token } = useSelector((state) => state.auth);
+  const [backendUrl, setBackendUrl] = useState('');
+
+  useEffect(() => {
+    const setUrl = async () => {
+        const url = await getBackendUrl();
+        setBackendUrl(url);
+    };
+    setUrl();
+  }, []);
 
   useEffect(() => {
     const fetchTeams = async () => {
-      if (!token) return;
+      if (!token || !backendUrl) return;
       try {
-        const response = await fetch('http://localhost:3001/api/chief/teams', {
+        const response = await fetch(`${backendUrl}/api/chief/teams`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -50,7 +60,7 @@ function ChiefTeams() {
     };
 
     fetchTeams();
-  }, [token]);
+  }, [token, backendUrl]);
 
   const handleTeamCreated = (newTeam) => {
     setTeams([...teams, {
@@ -76,8 +86,9 @@ function ChiefTeams() {
   };
 
   const handleAssignTask = async (memberId, taskDetails) => {
+    if (!backendUrl) return;
     try {
-      const response = await fetch('http://localhost:3001/api/chief/tasks/assign', {
+      const response = await fetch(`${backendUrl}/api/chief/tasks/assign`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,8 +105,7 @@ function ChiefTeams() {
         console.error('Failed to assign task:', data.message);
         toast.error(`Failed to assign task: ${data.message}`);
         // Optionally, show an error message
-      }
-    } catch (error) {
+      } catch (error) {
       console.error('Error assigning task:', error);
       toast.error('Error assigning task.');
     }

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import CreateTeamModal from './CreateTeamModal';
 import EditTeamModal from './EditTeamModal';
 import { toast } from 'sonner';
+import { getBackendUrl } from '../api';
 
 function ChiefDashboard() {
     const [data, setData] = useState(null);
@@ -36,15 +37,22 @@ function ChiefDashboard() {
     const [teamMembers, setTeamMembers] = useState([]);
     const [projectMembers, setProjectMembers] = useState([]); // New state for project-specific members
     const [projects, setProjects] = useState([]);
+    const [backendUrl, setBackendUrl] = useState('');
 
-    
+    useEffect(() => {
+        const setUrl = async () => {
+            const url = await getBackendUrl();
+            setBackendUrl(url);
+        };
+        setUrl();
+    }, []);
 
     useEffect(() => {
         
         const fetchData = async () => {
-            
+            if (!backendUrl) return;
             try {
-                const response = await fetch('http://localhost:3001/api/chief/dashboard', {
+                const response = await fetch(`${backendUrl}/api/chief/dashboard`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -64,9 +72,9 @@ function ChiefDashboard() {
         };
 
         const fetchTeams = async () => {
-            
+            if (!backendUrl) return;
             try {
-                const response = await fetch('http://localhost:3001/api/chief/teams', {
+                const response = await fetch(`${backendUrl}/api/chief/teams`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -86,9 +94,9 @@ function ChiefDashboard() {
         };
 
         const fetchUsers = async () => {
-            
+            if (!backendUrl) return;
             try {
-                const response = await fetch('http://localhost:3001/api/chief/users', {
+                const response = await fetch(`${backendUrl}/api/chief/users`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -108,9 +116,9 @@ function ChiefDashboard() {
         };
 
         const fetchProjects = async () => {
-            
+            if (!backendUrl) return;
             try {
-                const response = await fetch('http://localhost:3001/api/chief/projects', {
+                const response = await fetch(`${backendUrl}/api/chief/projects`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -129,20 +137,21 @@ function ChiefDashboard() {
             }
         };
 
-        if (token) {
+        if (token && backendUrl) {
             fetchData();
             fetchTeams();
             fetchUsers();
             fetchProjects();
         }
-    }, [token]);
+    }, [token, backendUrl]);
 
     useEffect(() => {
         console.log({ selectedProjectInEffect: selectedProject, teamIdInEffect: selectedProject?.team?._id }); // Debugging
         const fetchProjectMembers = async () => {
+            if (!backendUrl) return;
             if (selectedProject && selectedProject.team && selectedProject.team._id) {
                 try {
-                    const response = await fetch(`http://localhost:3001/api/chief/teams/${selectedProject.team._id}/members`, {
+                    const response = await fetch(`${backendUrl}/api/chief/teams/${selectedProject.team._id}/members`, {
                         headers: {
                             'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json'
@@ -166,11 +175,12 @@ function ChiefDashboard() {
         };
 
         fetchProjectMembers();
-    }, [selectedProject, token]); // Depend on selectedProject and token
+    }, [selectedProject, token, backendUrl]); // Depend on selectedProject and token
 
     const handleCreateProject = async () => {
+        if (!backendUrl) return;
         try {
-            const response = await fetch('http://localhost:3001/api/chief/projects', {
+            const response = await fetch(`${backendUrl}/api/chief/projects`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -187,7 +197,7 @@ function ChiefDashboard() {
                 setNewProject({ name: '', description: '', priority: 'medium', teamId: '' });
                 toast.success('Project created successfully!');
                 // Optionally, refetch projects to update the list
-                const response = await fetch('http://localhost:3001/api/chief/projects', {
+                const response = await fetch(`${backendUrl}/api/chief/projects`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -203,10 +213,11 @@ function ChiefDashboard() {
     };
 
     const handleEditProject = async () => {
+        if (!backendUrl) return;
         console.log('handleEditProject function called');
         
         try {
-            const response = await fetch(`http://localhost:3001/api/chief/projects/${editProject._id}`, {
+            const response = await fetch(`${backendUrl}/api/chief/projects/${editProject._id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -229,7 +240,7 @@ function ChiefDashboard() {
                 setEditProject(null);
                 toast.success('Project updated successfully!');
                 // Optionally, refetch projects to update the list
-                const response = await fetch('http://localhost:3001/api/chief/projects', {
+                const response = await fetch(`${backendUrl}/api/chief/projects`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -245,8 +256,9 @@ function ChiefDashboard() {
     };
 
     const handleCreateTaskInProject = async () => {
+        if (!backendUrl) return;
         try {
-            const response = await fetch(`http://localhost:3001/api/chief/projects/${selectedProject._id}/tasks`, {
+            const response = await fetch(`${backendUrl}/api/chief/projects/${selectedProject._id}/tasks`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -263,7 +275,7 @@ function ChiefDashboard() {
                 setNewTask({ title: '', description: '', members: 0, assignedTo: [], dueDate: '', priority: 'medium' });
                 toast.success('Task created successfully!');
                 // Optionally, refetch projects to update the list
-                const response = await fetch('http://localhost:3001/api/chief/projects', {
+                const response = await fetch(`${backendUrl}/api/chief/projects`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -279,8 +291,9 @@ function ChiefDashboard() {
     };
 
     const handleTeamClick = async (team) => {
+        if (!backendUrl) return;
         try {
-            const response = await fetch(`http://localhost:3001/api/chief/teams/${team._id}/members`, {
+            const response = await fetch(`${backendUrl}/api/chief/teams/${team._id}/members`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -315,17 +328,6 @@ function ChiefDashboard() {
             return team;
         }));
     };
-
-    if (!data || data.error) {
-        return (
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-                <p className="text-gray-400">
-                    {data?.error || 'Loading dashboard...'}
-                </p>
-            </div>
-        );
-    }
 
     return (
         <div>
