@@ -1,22 +1,31 @@
-# Health Check Improvement Plan
+# Fix for "Cannot read properties of null (reading 'recentActivity')" Error
 
-## Tasks to Complete:
+## Problem
+The application was throwing a JavaScript error: "Uncaught TypeError: Cannot read properties of null (reading 'recentActivity')" in both Admin and Chief dashboard components.
 
-### Backend Improvements:
-- [x] Add comprehensive health check endpoint at `/api/health` in Main/Backend/index.js
-- [x] Include database connectivity check in health endpoint
-- [x] Return JSON response with detailed status information
+## Root Cause
+The error occurred because the code was trying to access `data.recentActivity.map(...)` without checking if `data.recentActivity` was null or undefined. When the backend API returned null for the recentActivity field, the map function failed.
 
-### Frontend Improvements:
-- [x] Enhance getBackendUrl() function in Main/Frontend/src/api.js
-- [x] Add timeout for health check requests
-- [x] Improve error handling and fallback logic
+## Changes Made
 
-### Testing:
-- [ ] Test deployed backend detection
-- [ ] Test local backend fallback
-- [ ] Verify database connectivity check works
+### 1. Admin.jsx
+- Added null check before mapping over `data.recentActivity`
+- Added fallback UI with "No recent activity" message when recentActivity is empty or null
+- Changed from: `{data.recentActivity.map(...)}`
+- Changed to: `{data.recentActivity && data.recentActivity.length > 0 ? data.recentActivity.map(...) : <p>No recent activity</p>}`
 
-## Progress:
-- Created TODO list
-- Added comprehensive health check endpoint at /api/health
+### 2. ChiefDashboard.jsx
+- Added null check before mapping over `data.recentActivity`
+- Added fallback UI with "No recent activity" message when recentActivity is empty or null
+- Changed from: `{data.recentActivity.map(...)}`
+- Changed to: `{data.recentActivity && data.recentActivity.length > 0 ? data.recentActivity.map(...) : <p>No recent activity</p>}`
+
+## Files Modified
+- `Main/Frontend/src/Components/Admin.jsx`
+- `Main/Frontend/src/Components/ChiefDashboard.jsx`
+
+## Testing
+The changes should prevent the JavaScript error and provide a better user experience by showing a friendly message when there's no recent activity data.
+
+## Status
+✅ Completed - Both files have been successfully updated with proper null checks and fallback UI.
