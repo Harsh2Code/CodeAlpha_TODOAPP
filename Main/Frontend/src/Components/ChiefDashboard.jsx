@@ -64,10 +64,12 @@ function ChiefDashboard() {
                 }
 
                 const result = await response.json();
+                console.log('Chief Dashboard Data:', result);
                 setData(result);
             } catch (error) {
                 console.error('Error fetching chief data:', error);
                 setData({ error: 'Failed to load dashboard data' });
+                return;
             }
         };
 
@@ -90,6 +92,7 @@ function ChiefDashboard() {
             } catch (error) {
                 console.error('Error fetching teams:', error);
                 setTeams([]);
+                return;
             }
         };
 
@@ -112,6 +115,7 @@ function ChiefDashboard() {
             } catch (error) {
                 console.error('Error fetching users:', error);
                 setUsers([]);
+                return;
             }
         };
 
@@ -134,6 +138,7 @@ function ChiefDashboard() {
             } catch (error) {
                 console.error('Error fetching projects:', error);
                 setProjects([]);
+                return;
             }
         };
 
