@@ -170,7 +170,7 @@ function MemberDashboard() {
                     <button className="btn btn-soft px-8 p-3 rounded-md mx-2 font-bold">View More</button>
                 </span>
             </div>
-            {data && data.features && data.features.length > 0 && (
+            {data && data.features && data.features.length > 0 ? (
                 <div className='grid grid-cols-1 mt-8 md:grid-cols-3 gap-8 pt-8 mb-16 w-5/6 mx-auto'>
                     {data.features.map((feature) => (
                         <div key={feature.id} className="bg-gray-800 rounded-lg shadow-sm text-center border border-gray-700">
@@ -182,7 +182,7 @@ function MemberDashboard() {
                         </div>
                     ))}
                 </div>
-            )}
+            ) : null}
             <div className="grid grid-cols-1 mt-1 mx-auto md:grid-cols-2 gap-8 w-5/6  mb-[4rem]">
                 <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-5">
                     <h3 className="text-2xl font-semibold text-white mb-4 ">Project Flow Tracking</h3>
@@ -242,12 +242,12 @@ function MemberDashboard() {
                     </div>
                 ) : (
                     <ul className="list bg-base-100 rounded-box">
-                        {projects.map(project => (
+                        {projects && projects.map(project => (
                             <li key={project._id} className="p-4 border-b border-gray-700 last:border-b-0">
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <h4 className="font-medium text-white">{project.name}</h4>
-                                        <p className="text-sm text-gray-400">Chief: {project.chief.username}</p>
+                                        <p className="text-sm text-gray-400">Chief: {project.chief?.username || 'Unknown'}</p>
                                         <p className="text-sm text-gray-400">Progress: {project.completionPercentage}%</p>
                                     </div>
                                     <div className="badge badge-outline">{project.status}</div>
