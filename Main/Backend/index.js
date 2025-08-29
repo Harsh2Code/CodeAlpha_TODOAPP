@@ -40,6 +40,19 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/member', memberRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  const dbState = mongoose.connection.readyState;
+  // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+  const dbStatus = dbState === 1 ? 'connected' : 'disconnected';
+
+  res.status(200).json({
+    status: 'ok',
+    database: dbStatus,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
