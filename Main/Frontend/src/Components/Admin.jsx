@@ -45,7 +45,7 @@ function Admin() {
                                 </div>
                             </div>
                             <div className="ml-4">
-                                <p className="text-2xl font-bold text-white">{data.activeProjects}</p>
+                                <p className="text-2xl font-bold text-white">{data?.activeProjects || 0}</p>
                                 <p className="text-gray-400 text-sm">Active Projects</p>
                             </div>
                         </div>
@@ -58,7 +58,7 @@ function Admin() {
                                 </div>
                             </div>
                             <div className="ml-4">
-                                <p className="text-2xl font-bold text-white">{data.tasksCompleted}</p>
+                                <p className="text-2xl font-bold text-white">{data?.tasksCompleted || 0}</p>
                                 <p className="text-gray-400 text-sm">Tasks Completed</p>
                             </div>
                         </div>
@@ -71,7 +71,7 @@ function Admin() {
                                 </div>
                             </div>
                             <div className="ml-4">
-                                <p className="text-2xl font-bold text-white">{data.teamMembers}</p>
+                                <p className="text-2xl font-bold text-white">{data?.teamMembers || 0}</p>
                                 <p className="text-gray-400 text-sm">Team Members</p>
                             </div></div></div><div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
                         <div className="flex items-center"><div className="w-12 h-12 bg-red-900 rounded-lg flex items-center justify-center">
@@ -80,7 +80,7 @@ function Admin() {
                             </div>
                         </div>
                             <div className="ml-4">
-                                <p className="text-2xl font-bold text-white">{data.overdueTasks}</p>
+                                <p className="text-2xl font-bold text-white">{data?.overdueTasks || 0}</p>
                                 <p className="text-gray-400 text-sm">Overdue Tasks</p>
                             </div>
                         </div>
@@ -90,7 +90,7 @@ function Admin() {
                     <div className="lg:col-span-2">
                         <h2 className="text-xl font-semibold text-white mb-6">Active Projects</h2>
                         <div className="grid gap-6">
-                            {data.projects.map((project) => (
+                            {data?.projects?.map((project) => (
                                 <div key={project.id} className="bg-gray-800 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-700">
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex-1">
@@ -105,10 +105,10 @@ function Admin() {
                                     <div className="mb-4">
                                         <div className="flex justify-between items-center mb-2">
                                             <span className="text-sm font-medium text-gray-300">Progress</span>
-                                            <span className="text-sm font-medium text-white">{project.progress}%</span>
+                                            <span className="text-sm font-medium text-white">{project.progress || 0}%</span>
                                         </div>
                                         <div className="w-full bg-gray-700 rounded-full h-2">
-                                            <div className="bg-blue-500 h-2 rounded-full transition-all duration-300" style={{width: `${project.progress}%`}}>
+                                            <div className="bg-blue-500 h-2 rounded-full transition-all duration-300" style={{width: `${project.progress || 0}%`}}>
                                             </div>
                                         </div>
                                     </div>
@@ -117,13 +117,13 @@ function Admin() {
                                             <div className="w-4 h-4 flex items-center justify-center">
                                                 <i className="ri-team-line text-gray-500"></i>
                                             </div>
-                                            <span className="text-sm text-gray-400">{project.members} members</span>
+                                            <span className="text-sm text-gray-400">{project.members || 0} members</span>
                                         </div>
                                         <div className="flex items-center space-x-1">
                                             <div className="w-4 h-4 flex items-center justify-center">
                                                 <i className="ri-calendar-line text-gray-500"></i>
                                             </div>
-                                            <span className="text-sm text-gray-400">{project.dueDate}</span>
+                                            <span className="text-sm text-gray-400">{project.dueDate || 'No due date'}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -135,7 +135,7 @@ function Admin() {
                             <h2 className="text-xl font-semibold text-white mb-6">Upcoming Tasks</h2>
                             <div className="bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-700">
                                 <div className="space-y-4">
-                                    {data.upcomingTasks.map((task) => (
+                                    {data?.upcomingTasks?.map((task) => (
                                         <div key={task.id} className="flex items-center justify-between p-3 hover:bg-gray-700 rounded-lg transition-colors">
                                             <div>
                                                 <h4 className="font-medium text-white">{task.name}</h4>
@@ -152,12 +152,12 @@ function Admin() {
                             <div className="bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-700">
                                 <div className="space-y-4">
                                     {data?.recentActivity && data?.recentActivity.length > 0 ? (
-                                        data.recentActivity.map((activity) => (
+                                        data?.recentActivity?.map((activity) => (
                                             <div key={activity.id} className="flex items-start space-x-3">
-                                                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm flex-shrink-0">{activity.user.initial}</div>
+                                                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm flex-shrink-0">{activity.user?.initial || '?'}</div>
                                                 <div className="flex-1">
                                                     <p className="text-sm text-white">
-                                                        <span className="font-medium">{activity.user.name}</span> {activity.action}
+                                                        <span className="font-medium">{activity.user?.name || 'Unknown'}</span> {activity.action}
                                                         <span className="font-medium"> {activity.target}</span>
                                                     </p>
                                                     <p className="text-xs text-gray-500">{activity.time}</p>
