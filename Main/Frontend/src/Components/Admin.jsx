@@ -151,7 +151,7 @@ function Admin() {
                             <h2 className="text-xl font-semibold text-white mb-6">Recent Activity</h2>
                             <div className="bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-700">
                                 <div className="space-y-4">
-                                    {data.recentActivity && data.recentActivity.length > 0 ? (
+                                    {data?.recentActivity && data?.recentActivity.length > 0 ? (
                                         data.recentActivity.map((activity) => (
                                             <div key={activity.id} className="flex items-start space-x-3">
                                                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm flex-shrink-0">{activity.user.initial}</div>
