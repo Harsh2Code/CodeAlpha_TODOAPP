@@ -10,7 +10,7 @@ function MemberDashboard() {
     const [showModal, setShowModal] = useState(false);
     const [projects, setProjects] = useState([]);
     const [chiefTasks, setChiefTasks] = useState([]); // New state for chief tasks
-    const [chiefActivity, setChiefActivity] = useState(null);
+    const [chiefActivity, setChiefActivity] = useState({ projects: [], tasks: [], chief: null });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -293,7 +293,7 @@ function MemberDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {chiefActivity.projects.length > 0 && (
                             <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
-                                <h3 className="text-lg font-semibold text-white mb-4">Recent Projects by {chiefActivity.chief.username}</h3>
+                                <h3 className="text-lg font-semibold text-white mb-4">Recent Projects by {chiefActivity.chief?.username || 'Chief'}</h3>
                                 <ul className="space-y-3">
                                     {chiefActivity.projects.map(project => (
                                         <li key={project._id} className="text-gray-400 text-sm">
@@ -305,7 +305,7 @@ function MemberDashboard() {
                         )}
                         {chiefActivity.tasks.length > 0 && (
                             <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
-                                <h3 className="text-lg font-semibold text-white mb-4">Recent Tasks by {chiefActivity.chief.username}</h3>
+                                <h3 className="text-lg font-semibold text-white mb-4">Recent Tasks by {chiefActivity.chief?.username || 'Chief'}</h3>
                                 <ul className="space-y-3">
                                     {chiefActivity.tasks.map(task => (
                                         <li key={task._id} className="text-gray-400 text-sm">
