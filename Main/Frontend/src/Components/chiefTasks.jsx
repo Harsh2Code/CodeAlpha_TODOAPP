@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Toaster, toast } from 'sonner';
+import { getBackendUrl } from '../api';
 
 function ChiefTasks() {
     const [tasks, setTasks] = useState([]);
@@ -27,7 +28,8 @@ function ChiefTasks() {
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/tasks', {
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/chief/tasks`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -56,7 +58,8 @@ function ChiefTasks() {
     useEffect(() => {
         const fetchAllUsers = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/users', {
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/chief/users`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -82,7 +85,8 @@ function ChiefTasks() {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/teams', {
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/chief/teams`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -109,7 +113,8 @@ function ChiefTasks() {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/projects', {
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/chief/projects`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -175,7 +180,8 @@ function ChiefTasks() {
                 return;
             }
 
-            const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/tasks/assign', {
+            const backendUrl = await getBackendUrl();
+            const response = await fetch(`${backendUrl}/api/chief/tasks/assign`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

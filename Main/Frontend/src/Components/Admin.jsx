@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux';
+import { getBackendUrl } from '../api';
 
 function Admin() {
     const [data, setData] = useState(null);
@@ -8,7 +9,8 @@ function Admin() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/admin/dashboard', {
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/admin/dashboard`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

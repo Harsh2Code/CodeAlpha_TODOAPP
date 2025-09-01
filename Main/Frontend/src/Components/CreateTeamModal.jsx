@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Toaster, toast } from 'sonner';
+import { getBackendUrl } from '../api';
 
 function CreateTeamModal({ show, onClose, onTeamCreated }) {
     const [teamName, setTeamName] = useState('');
@@ -13,7 +14,8 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
             // Fetch all users to select as members
             const fetchUsers = async () => {
                 try {
-                    const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/users', {
+                    const backendUrl = await getBackendUrl();
+                    const response = await fetch(`${backendUrl}/api/chief/users`, {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
@@ -31,7 +33,8 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
 
     const handleCreateTeam = async () => {
         try {
-            const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/teams', {
+            const backendUrl = await getBackendUrl();
+            const response = await fetch(`${backendUrl}/api/chief/teams`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
