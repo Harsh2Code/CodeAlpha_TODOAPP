@@ -1,53 +1,65 @@
 import { deployedBackendUrl, localBackendUrl } from './config';
 
 export const getBackendUrl = async () => {
+  // First try deployed backend
   try {
-    // Create a timeout promise to avoid hanging requests
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Health check timeout')), 5000);
-    });
-
-    // Create the health check request
-    const healthCheckPromise = fetch(`${deployedBackendUrl}/api/health`, {
+    console.log('Checking deployed backend health...');
+    const response = await fetch(`${deployedBackendUrl}/api/health`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
+      // Add timeout
+      signal: AbortSignal.timeout(3000)
     });
 
-    // Race between the health check and timeout
-    const response = await Promise.race([healthCheckPromise, timeoutPromise]);
-    
     if (response.ok) {
       const healthData = await response.json();
       console.log('Deployed backend is healthy:', healthData);
       return deployedBackendUrl;
     } else {
-      console.warn('Deployed backend responded with non-OK status:', response.status);
+      console.warn('Deployed backend responded with status:', response.status);
+      // Try alternative health endpoint
+      try {
+        const altResponse = await fetch(`${deployedBackendUrl}/api/auth/health`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: AbortSignal.timeout(3000)
+        });
+        if (altResponse.ok) {
+          console.log('Deployed backend alternative health check passed');
+          return deployedBackendUrl;
+        }
+      } catch (altError) {
+        console.warn('Alternative health check also failed');
+      }
     }
   } catch (error) {
     console.warn('Deployed backend health check failed:', error.message);
-    // Fall back to local backend
   }
-  
+
   // Check if local backend is available
   try {
+    console.log('Checking local backend...');
     const localResponse = await fetch(`${localBackendUrl}/api/health`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: AbortSignal.timeout(2000)
     });
-    
+
     if (localResponse.ok) {
       console.log('Local backend is available');
       return localBackendUrl;
     }
   } catch (error) {
-    console.error('Both deployed and local backends are unavailable:', error.message);
-    // As a last resort, return deployed URL which might work in some cases
-    return deployedBackendUrl;
+    console.error('Local backend is also unavailable:', error.message);
   }
-  
-  return localBackendUrl;
+
+  // As a fallback, return deployed URL - some endpoints might still work
+  console.warn('Using deployed backend as fallback');
+  return deployedBackendUrl;
 };
