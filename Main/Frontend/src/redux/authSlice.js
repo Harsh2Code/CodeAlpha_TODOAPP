@@ -24,7 +24,21 @@ export const LoginUser = createAsyncThunk(
         },
         body: JSON.stringify(userData),
       });
-      const data = await response.json();
+
+      // Check if response body is empty
+      const contentLength = response.headers.get('content-length');
+      if (contentLength === '0' || !response.body) {
+        return rejectWithValue('Server returned an empty response. Please try again.');
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('JSON parsing error:', jsonError);
+        return rejectWithValue('Invalid response from server. Please try again.');
+      }
+
       if (!response.ok) {
         return rejectWithValue(data.message || 'Login failed');
       }
@@ -33,7 +47,7 @@ export const LoginUser = createAsyncThunk(
       localStorage.setItem('token', data.token);
       return data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.message || 'Network error occurred. Please check your connection.');
     }
   }
 );
