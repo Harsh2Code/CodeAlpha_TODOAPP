@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Toaster, toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { getBackendUrl } from '../api';
 
 function ChiefProjects() {
     const [projects, setProjects] = useState([]);
@@ -22,7 +23,8 @@ function ChiefProjects() {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/teams', {
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/chief/teams`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -49,19 +51,20 @@ function ChiefProjects() {
     useEffect(() => {
         const fetchDetailedProjects = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/projects', {
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/chief/projects`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const result = await response.json();
-                
+
                 // Enhance projects with task statistics similar to memberProjects
                 const enhancedProjects = result.map(project => ({
                     ...project,
@@ -70,13 +73,13 @@ function ChiefProjects() {
                         completed: project.tasks?.filter(task => task.status === 'completed').length || 0,
                         inProgress: project.tasks?.filter(task => task.status === 'in-progress').length || 0,
                         pending: project.tasks?.filter(task => task.status === 'pending').length || 0,
-                        completionPercentage: project.tasks?.length > 0 
+                        completionPercentage: project.tasks?.length > 0
                             ? Math.round((project.tasks.filter(task => task.status === 'completed').length / project.tasks.length) * 100)
                             : 0
                     },
                     recentTasks: project.tasks?.slice(0, 3) || []
                 }));
-                
+
                 setProjects(enhancedProjects);
             } catch (err) {
                 console.error('Error fetching detailed projects:', err);
@@ -94,7 +97,8 @@ function ChiefProjects() {
 
     const handleCreateProject = async () => {
         try {
-            const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/projects', {
+            const backendUrl = await getBackendUrl();
+            const response = await fetch(`${backendUrl}/api/chief/projects`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -111,13 +115,13 @@ function ChiefProjects() {
                 setNewProject({ name: '', description: '', priority: 'medium', teamId: '' });
                 toast.success('Project created successfully!');
                 // Refetch projects to update the list
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/chief/projects', {
+                const refetchResponse = await fetch(`${backendUrl}/api/chief/projects`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
-                const updatedProjects = await response.json();
+                const updatedProjects = await refetchResponse.json();
                 setProjects(updatedProjects);
             }
         } catch (error) {
