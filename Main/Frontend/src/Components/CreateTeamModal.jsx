@@ -58,12 +58,17 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
             const result = await response.json();
             console.log('Create team response:', response.status, result);
             if (response.ok) {
-                console.log('Team created successfully:', result.team);
-                onTeamCreated(result.team);
-                onClose();
-                setTeamName('');
-                setSelectedMembers([]);
-                toast.success("Team created successfully!");
+                console.log('Team created successfully:', result);
+                if (result && result.team) {
+                    onTeamCreated(result.team);
+                    onClose();
+                    setTeamName('');
+                    setSelectedMembers([]);
+                    toast.success("Team created successfully!");
+                } else {
+                    console.error('Invalid response format:', result);
+                    toast.error("Team created but response format is invalid. Please refresh the page.");
+                }
             } else {
                 console.error('Error creating team:', result);
                 toast.error(result.error || result.message || "Failed to create team!");

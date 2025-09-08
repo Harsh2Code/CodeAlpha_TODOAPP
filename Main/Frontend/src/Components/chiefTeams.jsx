@@ -64,16 +64,34 @@ function ChiefTeams() {
 
   const handleTeamCreated = (newTeam) => {
     console.log('handleTeamCreated called with:', newTeam);
+    if (!newTeam) {
+      console.error('newTeam is undefined');
+      toast.error('Failed to create team: Invalid response from server');
+      return;
+    }
+
     const transformedTeam = {
       ...newTeam,
       id: newTeam._id,
-      members: newTeam.members.map(member => ({
-        id: member._id,
-        name: member.username || member.email || 'Unknown',
-        role: member.role || 'Member',
-        avatar: member.username ? member.username.charAt(0).toUpperCase() : 'U',
-        status: 'offline'
-      })),
+      members: (newTeam.members || []).map(member => {
+        if (!member) {
+          console.warn('Undefined member in team');
+          return {
+            id: 'unknown',
+            name: 'Unknown',
+            role: 'Member',
+            avatar: 'U',
+            status: 'offline'
+          };
+        }
+        return {
+          id: member._id,
+          name: member.username || member.email || 'Unknown',
+          role: member.role || 'Member',
+          avatar: member.username ? member.username.charAt(0).toUpperCase() : 'U',
+          status: 'offline'
+        };
+      }),
       activeProjects: 0,
       completedTasks: 0,
       color: 'blue'
