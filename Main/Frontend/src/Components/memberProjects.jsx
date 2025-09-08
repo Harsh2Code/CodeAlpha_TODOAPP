@@ -22,7 +22,8 @@ function MemberProjects() {
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
                 }
                 
                 const result = await response.json();
@@ -38,8 +39,8 @@ function MemberProjects() {
                     const isInTeam = project.team && project.team.members && 
                                    project.team.members.some(member => member._id === user.id);
                     
-                    // For now, show all projects the member has access to
-                    return hasTasks || isInTeam || true; // Remove '|| true' to enable filtering
+                    // Remove '|| true' to enable filtering properly
+                    return hasTasks || isInTeam;
                 });
                 
                 setProjects(memberProjects);

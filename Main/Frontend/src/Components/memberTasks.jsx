@@ -76,20 +76,22 @@ function MemberTasks() {
 
         const fetchTasks = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/tasks', {
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/member/tasks`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
                 }
                 const result = await response.json();
                 console.log('API Result (raw tasks):', result);
 
                 // Assuming result.tasks is the array of tasks, similar to MemberDashboard
-                const allTasks = Array.isArray(result.tasks) ? result.tasks : result; 
+                const allTasks = Array.isArray(result.tasks) ? result.tasks : result;
                 console.log('All Tasks (after initial processing):', allTasks);
 
                 // Filter tasks based on assignedTo and createdBy (chief)

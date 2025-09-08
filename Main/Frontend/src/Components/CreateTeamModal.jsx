@@ -32,6 +32,16 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
     }, [show, token]);
 
     const handleCreateTeam = async () => {
+        if (!teamName.trim()) {
+            toast.error("Team name is required!");
+            return;
+        }
+
+        if (selectedMembers.length === 0) {
+            toast.error("Please select at least one member!");
+            return;
+        }
+
         try {
             const backendUrl = await getBackendUrl();
             const response = await fetch(`${backendUrl}/api/chief/teams`, {
@@ -41,22 +51,24 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    name: teamName,
+                    name: teamName.trim(),
                     members: selectedMembers,
                 })
             });
             const result = await response.json();
             if (response.ok) {
-                    onTeamCreated(result.team);
-                    onClose();
-                    setTeamName('');
-                    setSelectedMembers([]);
-                    toast.success("Team created successfully!");
-                } else {
+                onTeamCreated(result.team);
+                onClose();
+                setTeamName('');
+                setSelectedMembers([]);
+                toast.success("Team created successfully!");
+            } else {
                 console.error('Error creating team:', result);
+                toast.error(result.error || result.message || "Failed to create team!");
             }
         } catch (error) {
             console.error('Error creating team:', error);
+            toast.error("Network error! Please check your connection and try again.");
         }
     };
 
