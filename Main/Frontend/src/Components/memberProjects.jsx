@@ -27,22 +27,27 @@ function MemberProjects() {
                 }
                 
                 const result = await response.json();
-                
+                console.log('MemberProjects API result:', result);
+                console.log('User ID:', user.id);
+
                 // Filter projects for the current member based on assigned tasks or team membership
                 const memberProjects = result.filter(project => {
                     // Check if member has tasks in this project
-                    const hasTasks = project.tasks && project.tasks.some(task => 
+                    const hasTasks = project.tasks && project.tasks.some(task =>
                         task.assignedTo && task.assignedTo._id === user.id
                     );
-                    
+
                     // Check if member is part of the project's team
-                    const isInTeam = project.team && project.team.members && 
+                    const isInTeam = project.team && project.team.members &&
                                    project.team.members.some(member => member._id === user.id);
-                    
+
+                    console.log(`Project ${project.name}: hasTasks=${hasTasks}, isInTeam=${isInTeam}`);
+
                     // Remove '|| true' to enable filtering properly
                     return hasTasks || isInTeam;
                 });
-                
+
+                console.log('Filtered member projects:', memberProjects);
                 setProjects(memberProjects);
                 toast.success('Projects loaded successfully!');
             } catch (err) {

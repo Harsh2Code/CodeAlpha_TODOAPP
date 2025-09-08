@@ -56,7 +56,9 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
                 })
             });
             const result = await response.json();
+            console.log('Create team response:', response.status, result);
             if (response.ok) {
+                console.log('Team created successfully:', result.team);
                 onTeamCreated(result.team);
                 onClose();
                 setTeamName('');
@@ -68,7 +70,11 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
             }
         } catch (error) {
             console.error('Error creating team:', error);
-            toast.error("Network error! Please check your connection and try again.");
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                toast.error("Network error! Please check your connection and try again.");
+            } else {
+                toast.error(`Unexpected error: ${error.message}`);
+            }
         }
     };
 

@@ -63,7 +63,8 @@ function ChiefTeams() {
   }, [token, backendUrl]);
 
   const handleTeamCreated = (newTeam) => {
-    setTeams([...teams, {
+    console.log('handleTeamCreated called with:', newTeam);
+    const transformedTeam = {
       ...newTeam,
       id: newTeam._id,
       members: newTeam.members.map(member => ({
@@ -76,7 +77,13 @@ function ChiefTeams() {
       activeProjects: 0,
       completedTasks: 0,
       color: 'blue'
-    }]);
+    };
+    console.log('Transformed team:', transformedTeam);
+    setTeams(prevTeams => {
+      const newTeams = [...prevTeams, transformedTeam];
+      console.log('Updated teams state:', newTeams);
+      return newTeams;
+    });
     toast.success('Team created successfully!');
   };
 
