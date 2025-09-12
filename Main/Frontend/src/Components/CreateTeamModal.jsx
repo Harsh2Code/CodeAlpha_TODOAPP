@@ -41,7 +41,7 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
             toast.error("Please select at least one member!");
             return;
         }
-
+f
         try {
             console.log('Starting team creation...');
             const backendUrl = await getBackendUrl();

@@ -30,22 +30,8 @@ function MemberProjects() {
                 console.log('MemberProjects API result:', result);
                 console.log('User ID:', user.id);
 
-                // Filter projects for the current member based on assigned tasks or team membership
-                const memberProjects = result.filter(project => {
-                    // Check if member has tasks in this project
-                    const hasTasks = project.tasks && project.tasks.some(task =>
-                        task.assignedTo && task.assignedTo._id === user.id
-                    );
-
-                    // Check if member is part of the project's team
-                    const isInTeam = project.team && project.team.members &&
-                                   project.team.members.some(member => member._id === user.id);
-
-                    console.log(`Project ${project.name}: hasTasks=${hasTasks}, isInTeam=${isInTeam}`);
-
-                    // Remove '|| true' to enable filtering properly
-                    return hasTasks || isInTeam;
-                });
+                // The backend already filters projects for the member, so no need to filter again
+                const memberProjects = result;
 
                 console.log('Filtered member projects:', memberProjects);
                 setProjects(memberProjects);
