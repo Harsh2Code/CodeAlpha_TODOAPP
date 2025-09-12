@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Toaster, toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { getBackendUrl } from '../api';
 
 function MemberProjects() {
     const [projects, setProjects] = useState([]);
@@ -14,7 +15,8 @@ function MemberProjects() {
     useEffect(() => {
         const fetchDetailedProjects = async () => {
             try {
-const response = await fetch(import.meta.env.VITE_APP_API_URL + '/api/member/projects', {
+                const backendUrl = await getBackendUrl();
+                const response = await fetch(`${backendUrl}/api/member/projects`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
