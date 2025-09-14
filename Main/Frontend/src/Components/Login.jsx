@@ -48,7 +48,9 @@ export default function Login() {
         <div className="max-w-md w-full mx-4">
           <div className="bg-gray-800 rounded-lg shadow-lg p-8 border border-gray-700">
             <div className="text-center mb-8">
-              <img src="/cha-bubbles-two-svgrepo-com.svg" alt="logo" className="w-12 mx-auto" />
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto">
+                L
+              </div>
               <p className="text-gray-400 mt-2">Sign in to your account</p>
             </div>
 
