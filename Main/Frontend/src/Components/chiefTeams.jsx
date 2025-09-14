@@ -93,13 +93,13 @@ function ChiefTeams() {
             status: 'online'
           };
         }
-        return {
-          id: member.id,
-          name: member.name || member.email || 'Unknown',
-          role: member.role || 'Member',
-          avatar: member.name ? member.name.charAt(0).toUpperCase() : 'U',
-          status: 'online'
-        };
+      return {
+        id: member._id || member.id,
+        name: member.name || member.username || member.email || 'Unknown',
+        role: member.role || 'Member',
+        avatar: (member.name || member.username) ? (member.name || member.username).charAt(0).toUpperCase() : 'U',
+        status: 'online'
+      };
       }),
       activeProjects: 0,
       completedTasks: 0,
