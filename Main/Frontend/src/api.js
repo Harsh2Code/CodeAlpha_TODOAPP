@@ -1,7 +1,7 @@
 import { deployedBackendUrl, localBackendUrl } from './config';
 
 export const getBackendUrl = async () => {
-  // Use local backend URL for development
-  console.log('Using local backend URL');
-  return localBackendUrl;
+  // Use deployed backend URL since backend is deployed
+  console.log('Using deployed backend URL');
+  return deployedBackendUrl;
 };
