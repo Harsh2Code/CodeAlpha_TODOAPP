@@ -31,9 +31,9 @@ exports.createTeam = async (req, res) => {
 
     // Populate the team with member details
     const populatedTeam = await Team.findById(team._id)
-      .populate('members', 'name email role')
+      .populate('members', 'username email role')
       .populate('task', 'title description')
-      .populate('chief', 'name email');
+      .populate('chief', 'username email');
 
     res.status(201).json({
       success: true,
@@ -54,8 +54,8 @@ exports.getTeams = async (req, res) => {
     const chiefId = req.user.id;
     console.log('Fetching teams for chiefId:', chiefId);
     const teams = await Team.find({ chief: chiefId })
-      .populate('members', 'name email role')
-      .populate('chief', 'name email')
+      .populate('members', 'username email role')
+      .populate('chief', 'username email')
       .select('name description members chief');
     console.log('Raw teams from query:', teams);
     console.log('Teams found:', teams);
@@ -125,8 +125,8 @@ exports.updateTeam = async (req, res) => {
     await team.save();
 
     const populatedTeam = await Team.findById(team._id)
-      .populate('members', 'name email role')
-      .populate('chief', 'name email');
+      .populate('members', 'username email role')
+      .populate('chief', 'username email');
 
     res.json({ success: true, message: 'Team updated successfully', team: populatedTeam });
   } catch (error) {
@@ -155,8 +155,8 @@ exports.removeMemberFromTeam = async (req, res) => {
     await team.save();
 
     const populatedTeam = await Team.findById(team._id)
-      .populate('members', 'name email role')
-      .populate('chief', 'name email');
+      .populate('members', 'username email role')
+      .populate('chief', 'username email');
 
     res.json({ success: true, message: 'Member removed successfully', team: populatedTeam });
   } catch (error) {
@@ -188,8 +188,8 @@ exports.promoteMemberToLeader = async (req, res) => {
     await team.save();
 
     const populatedTeam = await Team.findById(team._id)
-      .populate('members', 'name email role')
-      .populate('chief', 'name email');
+      .populate('members', 'username email role')
+      .populate('chief', 'username email');
 
     res.json({ success: true, message: 'Member promoted successfully', team: populatedTeam });
   } catch (error) {
