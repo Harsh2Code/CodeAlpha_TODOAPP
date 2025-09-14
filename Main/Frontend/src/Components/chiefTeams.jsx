@@ -74,6 +74,15 @@ function ChiefTeams() {
       ...newTeam,
       id: newTeam._id,
       members: (newTeam.members || []).map(member => {
+        if (typeof member === 'string') {
+          return {
+            id: member,
+            name: 'Unknown',
+            role: 'Member',
+            avatar: 'U',
+            status: 'offline'
+          };
+        }
         if (!member) {
           console.warn('Undefined member in team');
           return {
