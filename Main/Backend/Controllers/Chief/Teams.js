@@ -35,6 +35,14 @@ exports.createTeam = async (req, res) => {
       .populate('task', 'title description')
       .populate('chief', 'username email');
 
+    // Transform members to include 'name' field for frontend compatibility
+    populatedTeam.members = populatedTeam.members.map(member => ({
+      id: member._id.toString(),
+      name: member.username,
+      email: member.email,
+      role: member.role,
+    }));
+
     res.status(201).json({
       success: true,
       message: 'Team created successfully',
@@ -57,6 +65,16 @@ exports.getTeams = async (req, res) => {
       .populate('members', 'username email role')
       .populate('chief', 'username email')
       .select('name description members chief');
+
+    // Transform members to include 'name' field for frontend compatibility
+    teams.forEach(team => {
+      team.members = team.members.map(member => ({
+        id: member._id.toString(),
+        name: member.username,
+        email: member.email,
+        role: member.role,
+      }));
+    });
     console.log('Raw teams from query:', teams);
     console.log('Teams found:', teams);
     
@@ -128,6 +146,14 @@ exports.updateTeam = async (req, res) => {
       .populate('members', 'username email role')
       .populate('chief', 'username email');
 
+    // Transform members to include 'name' field for frontend compatibility
+    populatedTeam.members = populatedTeam.members.map(member => ({
+      id: member._id.toString(),
+      name: member.username,
+      email: member.email,
+      role: member.role,
+    }));
+
     res.json({ success: true, message: 'Team updated successfully', team: populatedTeam });
   } catch (error) {
     console.error('Error updating team:', error);
@@ -157,6 +183,14 @@ exports.removeMemberFromTeam = async (req, res) => {
     const populatedTeam = await Team.findById(team._id)
       .populate('members', 'username email role')
       .populate('chief', 'username email');
+
+    // Transform members to include 'name' field for frontend compatibility
+    populatedTeam.members = populatedTeam.members.map(member => ({
+      id: member._id.toString(),
+      name: member.username,
+      email: member.email,
+      role: member.role,
+    }));
 
     res.json({ success: true, message: 'Member removed successfully', team: populatedTeam });
   } catch (error) {

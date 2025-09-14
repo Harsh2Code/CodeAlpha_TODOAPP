@@ -37,11 +37,11 @@ function ChiefTeams() {
             ...team,
             id: team._id,
             members: team.members.map(member => ({
-              id: member._id,
-              name: member.username || member.email || 'Unknown',
+              id: member.id,
+              name: member.name || member.email || 'Unknown',
               role: member.role || 'Member',
-              avatar: member.username ? member.username.charAt(0).toUpperCase() : 'U',
-              status: 'offline'
+              avatar: member.name ? member.name.charAt(0).toUpperCase() : 'U',
+              status: 'online'
             })),
             activeProjects: 0,
             completedTasks: 0,
@@ -80,7 +80,7 @@ function ChiefTeams() {
             name: 'Unknown',
             role: 'Member',
             avatar: 'U',
-            status: 'offline'
+            status: 'online'
           };
         }
         if (!member) {
@@ -90,15 +90,15 @@ function ChiefTeams() {
             name: 'Unknown',
             role: 'Member',
             avatar: 'U',
-            status: 'offline'
+            status: 'online'
           };
         }
         return {
-          id: member._id,
-          name: member.username || member.email || 'Unknown',
+          id: member.id,
+          name: member.name || member.email || 'Unknown',
           role: member.role || 'Member',
-          avatar: member.username ? member.username.charAt(0).toUpperCase() : 'U',
-          status: 'offline'
+          avatar: member.name ? member.name.charAt(0).toUpperCase() : 'U',
+          status: 'online'
         };
       }),
       activeProjects: 0,
