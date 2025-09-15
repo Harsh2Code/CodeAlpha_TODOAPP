@@ -290,7 +290,7 @@ function ChiefDashboard() {
         }));
     };
 
-    if (loading) {
+    if (loading || !data) {
         return <div>Loading...</div>;
     }
 
@@ -455,7 +455,7 @@ function ChiefDashboard() {
                             <h2 className="text-xl font-semibold text-white mb-6">Upcoming Tasks</h2>
                             <div className="bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-700 min-h-24">
                                 <div className="space-y-4">
-                                    {data?.upcomingTasks?.length > 0 ? (
+                                    {data?.upcomingTasks && Array.isArray(data.upcomingTasks) && data.upcomingTasks.length > 0 ? (
                                         data.upcomingTasks.map((task) => (
                                             <div key={task.id} className="flex items-center justify-between p-3 hover:bg-gray-700 rounded-lg transition-colors">
                                                 <div>
