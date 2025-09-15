@@ -38,6 +38,7 @@ function ChiefDashboard() {
     const [projectMembers, setProjectMembers] = useState([]); // New state for project-specific members
     const [projects, setProjects] = useState([]);
     const [backendUrl, setBackendUrl] = useState('');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const setUrl = async () => {
@@ -48,105 +49,63 @@ function ChiefDashboard() {
     }, []);
 
     useEffect(() => {
-        
         const fetchData = async () => {
-            if (!backendUrl) return;
+            if (!backendUrl || !token) return;
+
+            setLoading(true);
+
             try {
-                const response = await fetch(`${backendUrl}/api/chief/dashboard`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+                const [dashboardResponse, teamsResponse, usersResponse, projectsResponse] = await Promise.all([
+                    fetch(`${backendUrl}/api/chief/dashboard`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }),
+                    fetch(`${backendUrl}/api/chief/teams`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }),
+                    fetch(`${backendUrl}/api/chief/users`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }),
+                    fetch(`${backendUrl}/api/chief/projects`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                ]);
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!dashboardResponse.ok) throw new Error(`Dashboard fetch failed: ${dashboardResponse.status}`);
+                if (!teamsResponse.ok) throw new Error(`Teams fetch failed: ${teamsResponse.status}`);
+                if (!usersResponse.ok) throw new Error(`Users fetch failed: ${usersResponse.status}`);
+                if (!projectsResponse.ok) throw new Error(`Projects fetch failed: ${projectsResponse.status}`);
 
-                const result = await response.json();
-                setData(result);
+                const dashboardData = await dashboardResponse.json();
+                const teamsData = await teamsResponse.json();
+                const usersData = await usersResponse.json();
+                const projectsData = await projectsResponse.json();
+
+                setData(dashboardData);
+                setTeams(teamsData);
+                setUsers(usersData);
+                setProjects(projectsData);
+
             } catch (error) {
-                console.error('Error fetching chief data:', error);
+                console.error('Error fetching data:', error);
                 setData({ error: 'Failed to load dashboard data' });
-                return;
+            } finally {
+                setLoading(false);
             }
         };
 
-        const fetchTeams = async () => {
-            if (!backendUrl) return;
-            try {
-                const response = await fetch(`${backendUrl}/api/chief/teams`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                setTeams(result);
-            } catch (error) {
-                console.error('Error fetching teams:', error);
-                setTeams([]);
-                return;
-            }
-        };
-
-        const fetchUsers = async () => {
-            if (!backendUrl) return;
-            try {
-                const response = await fetch(`${backendUrl}/api/chief/users`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                setUsers(result);
-            } catch (error) {
-                console.error('Error fetching users:', error);
-                setUsers([]);
-                return;
-            }
-        };
-
-        const fetchProjects = async () => {
-            if (!backendUrl) return;
-            try {
-                const response = await fetch(`${backendUrl}/api/chief/projects`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                setProjects(result);
-            } catch (error) {
-                console.error('Error fetching projects:', error);
-                setProjects([]);
-                return;
-            }
-        };
-
-        if (token && backendUrl) {
-            fetchData();
-            fetchTeams();
-            fetchUsers();
-            fetchProjects();
-        }
+        fetchData();
     }, [token, backendUrl]);
 
     useEffect(() => {
@@ -327,6 +286,10 @@ function ChiefDashboard() {
             return team;
         }));
     };
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div>
