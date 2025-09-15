@@ -64,7 +64,6 @@ function ChiefDashboard() {
                 }
 
                 const result = await response.json();
-                console.log('Chief Dashboard Data:', result);
                 setData(result);
             } catch (error) {
                 console.error('Error fetching chief data:', error);
@@ -151,7 +150,6 @@ function ChiefDashboard() {
     }, [token, backendUrl]);
 
     useEffect(() => {
-        console.log({ selectedProjectInEffect: selectedProject, teamIdInEffect: selectedProject?.team?._id }); // Debugging
         const fetchProjectMembers = async () => {
             if (!backendUrl) return;
             if (selectedProject && selectedProject.team && selectedProject.team._id) {
@@ -169,7 +167,6 @@ function ChiefDashboard() {
 
                     const result = await response.json();
                     setProjectMembers(result);
-                    console.log({ fetchedProjectMembers: result }); // Debugging
                 } catch (error) {
                     console.error('Error fetching project members:', error);
                     setProjectMembers([]);
@@ -219,7 +216,6 @@ function ChiefDashboard() {
 
     const handleEditProject = async () => {
         if (!backendUrl) return;
-        console.log('handleEditProject function called');
         
         try {
             const response = await fetch(`${backendUrl}/api/chief/projects/${editProject._id}`, {
@@ -317,9 +313,9 @@ function ChiefDashboard() {
     };
 
     const handleTeamCreated = (newTeam) => {
-        toast.success(`Team "${newTeam.team.name}" created successfully!`);
+        toast.success(`Team "${newTeam.name}" created successfully!`);
         // Optionally refresh teams list or add the new team to the state
-        setTeams((prevTeams) => [...prevTeams, newTeam.team]);
+        setTeams((prevTeams) => [...prevTeams, newTeam]);
     };
 
     const handleTeamUpdated = (updatedTeam) => {
@@ -479,7 +475,6 @@ function ChiefDashboard() {
                                                 onClick={() => {
                                                     setShowCreateTaskModal(true);
                                                     setSelectedProject(project);
-                                                    console.log({ selectedProjectOnTaskCreate: project }); // Debugging
                                                 }}
                                                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                                             >
@@ -731,7 +726,6 @@ function ChiefDashboard() {
                                     onChange={(e) => setNewTask({ ...newTask, assignedTo: Array.from(e.target.selectedOptions, option => option.value) })}
                                     className="w-full p-3 border border-gray-600 rounded-lg text-sm bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                                 >
-                                    {console.log({ projectMembersInRender: projectMembers })} {/* Debugging */}
                                     {projectMembers.map((member) => (
                                         <option key={member._id} value={member._id}>{member.username}</option>
                                     ))}

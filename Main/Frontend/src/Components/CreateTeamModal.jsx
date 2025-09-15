@@ -43,15 +43,12 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
         }
 
         try {
-            console.log('Starting team creation...');
             const backendUrl = await getBackendUrl();
-            console.log('Backend URL:', backendUrl);
 
             const requestBody = {
                 name: teamName.trim(),
                 members: selectedMembers,
             };
-            console.log('Request body:', requestBody);
 
             const response = await fetch(`${backendUrl}/api/chief/teams`, {
                 method: 'POST',
@@ -61,12 +58,10 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
                 },
                 body: JSON.stringify(requestBody)
             });
-            console.log('Fetch response status:', response.status);
 
             let result;
             try {
                 result = await response.json();
-                console.log('Parsed response:', result);
             } catch (jsonError) {
                 console.error('Error parsing JSON response:', jsonError);
                 toast.error("Invalid response from server");
@@ -74,42 +69,26 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
             }
 
             if (response.ok) {
-                console.log('Response is OK, checking result.team...');
-                if (result && result.team) {
-                    console.log('Calling onTeamCreated with:', result.team);
+                if (result) {
+                    toast.success("Team created successfully!");
                     try {
-                        onTeamCreated(result.team);
+                        onTeamCreated(result);
                         onClose();
                         setTeamName('');
                         setSelectedMembers([]);
-                        toast.success("Team created successfully!");
                     } catch (callbackError) {
                         console.error('Error in onTeamCreated callback:', callbackError);
                         toast.error("Team created but failed to update UI. Please refresh the page.");
                     }
-                } else {
-                    console.error('Invalid response format - no team property:', result);
-                    toast.error("Team created but response format is invalid. Please refresh the page.");
-                }
             } else {
-                console.error('Response not OK:', result);
                 toast.error(result.error || result.message || "Failed to create team!");
             }
         } catch (error) {
             console.error('Caught error in handleCreateTeam:', error);
-            console.error('Error type:', typeof error);
-            console.error('Error properties:', Object.keys(error));
-            if (error && error.name) {
-                console.error('Error name:', error.name);
-                console.error('Error message:', error.message);
-                if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                    toast.error("Network error! Please check your connection and try again.");
-                } else {
-                    toast.error(`Unexpected error: ${error.name} - ${error.message}`);
-                }
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                toast.error("Network error! Please check your connection and try again.");
             } else {
-                console.error('Error object is invalid:', error);
-                toast.error("An unknown error occurred during team creation");
+                toast.error(`Unexpected error: ${error.name} - ${error.message}`);
             }
         }
     };
