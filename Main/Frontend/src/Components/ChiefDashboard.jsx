@@ -100,6 +100,9 @@ function ChiefDashboard() {
             } catch (error) {
                 console.error('Error fetching data:', error);
                 setData({ error: 'Failed to load dashboard data' });
+                setTeams([]);
+                setUsers([]);
+                setProjects([]);
             } finally {
                 setLoading(false);
             }
