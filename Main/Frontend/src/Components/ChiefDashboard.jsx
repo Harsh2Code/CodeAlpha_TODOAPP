@@ -312,10 +312,28 @@ function ChiefDashboard() {
         setTeamMembers([]);
     };
 
-    const handleTeamCreated = (newTeam) => {
+    const handleTeamCreated = async (newTeam) => {
         toast.success(`Team "${newTeam.name}" created successfully!`);
-        // Optionally refresh teams list or add the new team to the state
-        setTeams((prevTeams) => [...prevTeams, newTeam]);
+        // Refetch teams to update the list
+        if (!backendUrl) return;
+        try {
+            const response = await fetch(`${backendUrl}/api/chief/teams`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            setTeams(result);
+        } catch (error) {
+            console.error('Error fetching teams:', error);
+            toast.error("Failed to refresh teams list.");
+        }
     };
 
     const handleTeamUpdated = (updatedTeam) => {

@@ -69,10 +69,10 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
             }
 
             if (response.ok) {
-                if (result) {
+                if (result && result.team) {
                     toast.success("Team created successfully!");
                     try {
-                        onTeamCreated(result);
+                        onTeamCreated(result.team);
                         onClose();
                         setTeamName('');
                         setSelectedMembers([]);
@@ -80,6 +80,9 @@ function CreateTeamModal({ show, onClose, onTeamCreated }) {
                         console.error('Error in onTeamCreated callback:', callbackError);
                         toast.error("Team created but failed to update UI. Please refresh the page.");
                     }
+                } else {
+                    toast.error("Team created but response format is invalid. Please refresh the page.");
+                }
             } else {
                 toast.error(result.error || result.message || "Failed to create team!");
             }
