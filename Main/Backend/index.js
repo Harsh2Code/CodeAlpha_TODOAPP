@@ -24,9 +24,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Root route for API server
+// Root route - redirect to frontend
 app.get('/', (req, res) => {
-  res.json({ message: 'API Server is running', status: 'ok' });
+  res.redirect('https://projectmanagementtool-bbdi.onrender.com/');
 });
 
 mongoose.connect(config.mongoURI)
