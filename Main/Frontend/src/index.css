@@ -6,7 +6,29 @@
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  color: oklch(100% 0.00011 271.152 / 0.87);
+  -text: oklch(0.96 0 264);
+  --text-muted: oklch(0.76 0 264)
+
+  --shadow-s:
+    inset 0 1px 2px #ffffff30, /*top highlight*/
+    0 1px 2px #00000030, /*top highlight*/
+     0 1px 2px #00000015; /*top highlight*/
+  --shadow-m:
+    inset 0 1px 2px #ffffff20, /*top highlight*/
+    0 2px 4px #00000030, /*top highlight*/
+     0 4px 8px #00000015; /*top highlight*/
+  --shadow-l:
+    inset 0 1px 2px #ffffff50, /*top highlight*/
+    0 2px 6px #00000030, /*top highlight*/
+     0 4px 12px #00000015; /*top highlight*/
+}
+
+.card1 {
+  box-shadow: var(--shadow-s);
+}
+.card1:hover {
+  box-shadow: var(--shadow-m);
 }
 
 body {

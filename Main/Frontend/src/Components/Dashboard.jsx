@@ -32,7 +32,7 @@ export default function Dashboard() {
               Get Started
             </a>
             <a
-              className="bg-gray-800 text-gray-300 px-8 py-3 rounded-lg font-medium border border-gray-600 hover:bg-gray-700 transition-colors cursor-pointer whitespace-nowrap"
+              className="card1 bg-gray-800 text-gray-300 px-8 py-3 rounded-lg font-medium border border-gray-600 hover:bg-gray-700 transition-colors cursor-pointer whitespace-nowrap"
               href="/preview/dc2e455e-4b9c-499c-9a40-b264f94431bb/1694150/projects"
             >
               View Projects
@@ -40,7 +40,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="card1 grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           <div className="bg-gray-800 rounded-lg p-8 shadow-sm text-center border border-gray-700">
             <div className="w-16 h-16 bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
               <div className="w-8 h-8 flex items-center justify-center">
@@ -55,7 +55,7 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div className="bg-gray-800 rounded-lg p-8 shadow-sm text-center border border-gray-700">
+          <div className="card1 bg-gray-800 rounded-lg p-8 shadow-sm text-center border border-gray-700">
             <div className="w-16 h-16 bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
               <div className="w-8 h-8 flex items-center justify-center">
                 <i className="ri-notification-3-line text-green-400 text-3xl"></i>

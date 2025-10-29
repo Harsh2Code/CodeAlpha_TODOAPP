@@ -128,7 +128,7 @@ function MemberDashboard() {
 
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-gray-800 rounded-lg p-6 w-96 max-w-full mx-4 border border-gray-700">
+                    <div className="bg-[#150634] rounded-lg p-6 w-96 max-w-full mx-4 border border-gray-700">
                         <h3 className="text-lg font-semibold mb-4 text-white">Add Chief</h3>
                         <div className="space-y-4">
                             <div>
