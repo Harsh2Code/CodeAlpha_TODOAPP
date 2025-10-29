@@ -24,6 +24,11 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Root route for API server
+app.get('/', (req, res) => {
+  res.json({ message: 'API Server is running', status: 'ok' });
+});
+
 mongoose.connect(config.mongoURI)
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => console.log('MongoDB connection error:', err));
