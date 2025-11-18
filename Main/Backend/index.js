@@ -15,7 +15,14 @@ const port = process.env.PORT || 3001;
 
 // Configure CORS
 const corsOptions = {
-  origin: process.env.FRONTEND_URL ? [process.env.FRONTEND_URL, 'https://projectmanagementtool-bbdi.onrender.com', 'http://localhost:5173', 'http://localhost:3001'] : ['https://projectmanagementtool-bbdi.onrender.com', 'http://localhost:5173', 'http://localhost:3001'],
+  origin: function (origin, callback) {
+    const allowedOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL, 'https://projectmanagementtool-bbdi.onrender.com', 'http://localhost:5173', 'http://localhost:3001'] : ['https://projectmanagementtool-bbdi.onrender.com', 'http://localhost:5173', 'http://localhost:3001'];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
