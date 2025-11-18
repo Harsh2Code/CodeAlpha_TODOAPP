@@ -36,7 +36,7 @@ function ChiefTeams() {
           const transformedTeams = result.map(team => ({
             ...team,
             id: team._id,
-            members: team.members.map(member => ({
+            members: team.members.filter(member => member).map(member => ({
               id: member.id,
               name: member.name || member.email || 'Unknown',
               role: member.role || 'Member',

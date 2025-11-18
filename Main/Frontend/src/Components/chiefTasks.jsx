@@ -40,7 +40,7 @@ function ChiefTasks() {
                     throw new Error(`HTTP error! status: ${response.status}, Details: ${errorData.message || JSON.stringify(errorData)}`);
                 }
                 const result = await response.json();
-                setTasks(Array.isArray(result) ? result : []);
+                setTasks(Array.isArray(result) ? result.filter(task => task && task._id) : []);
             } catch (err) {
                 console.error('Error fetching tasks:', err);
                 setError(err.message || 'Failed to load tasks.');
@@ -137,39 +137,49 @@ function ChiefTasks() {
         }
     }, [token]);
 
-    // Filter assignable members based on selected project's team
+    // Fetch assignable members based on selected project's team
     useEffect(() => {
-        if (selectedProjectId && projects.length > 0) {
-            const project = projects.find(p => p._id === selectedProjectId);
-            if (project && project.team) {
-                
-                // Handle both direct team reference and populated team object
-                const teamId = typeof project.team === 'string' ? project.team : project.team._id;
-                const team = teams.find(t => t._id === teamId);
-                
-                if (team && team.members && team.members.length > 0) {
-                    
-                    // Handle both populated and unpopulated member objects
-                    const teamMemberIds = team.members.map(member => {
-                        return typeof member === 'string' ? member : member._id;
-                    });
-                    
-                    const membersOfSelectedTeam = users.filter(user => {
-                        const userId = user._id.toString();
-                        return teamMemberIds.some(memberId => memberId.toString() === userId);
-                    });
-                    
-                    setAssignableMembers(membersOfSelectedTeam);
+        const fetchAssignableMembers = async () => {
+            if (selectedProjectId && projects.length > 0) {
+                const project = projects.find(p => p._id === selectedProjectId);
+                console.log('Selected project ID:', selectedProjectId);
+                console.log('Project:', project);
+                if (project && project.team && project.team._id) {
+                    console.log('Team ID:', project.team._id);
+                    try {
+                        const backendUrl = await getBackendUrl();
+                        const response = await fetch(`${backendUrl}/api/chief/teams/${project.team._id}/members`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const result = await response.json();
+                        console.log('Fetched result:', result);
+                        setAssignableMembers(result);
+                        console.log('Set assignableMembers to:', result);
+                    } catch (err) {
+                        console.error('Error fetching team members:', err);
+                        setAssignableMembers([]);
+                    }
                 } else {
+                    console.log('No team or team ID found');
                     setAssignableMembers([]);
                 }
             } else {
+                console.log('No selected project or no projects loaded');
                 setAssignableMembers([]);
             }
-        } else {
-            setAssignableMembers([]);
+        };
+
+        if (token) {
+            fetchAssignableMembers();
         }
-    }, [selectedProjectId, projects, teams, users]);
+    }, [selectedProjectId, projects, token]);
 
     const handleCreateTask = async () => {
         try {
@@ -288,15 +298,15 @@ function ChiefTasks() {
                                 <div className="mb-0 pt-4 border-t border-gray-700">
                                     <h4 className="text-sm font-medium text-gray-300 mb-2">Assigned To:</h4>
                                     <div className="flex flex-wrap gap-2">
-                                        {task.assignedTo && task.assignedTo.length > 0 ? (
-                                            task.assignedTo.map(assignee => {
+                                        {task.assignedTo && task.assignedTo.filter(a => a).length > 0 ? (
+                                            task.assignedTo.filter(a => a).map(assignee => {
                                                 const assigneeUser = typeof assignee === 'object' ? assignee : users.find(u => u._id.toString() === assignee.toString());
                                                 const displayName = assigneeUser ? assigneeUser.username : 'Unknown User';
                                                 const userId = typeof assignee === 'object' ? assignee._id : assignee;
-                                                
+
                                                 return (
-                                                    <span 
-                                                        key={userId} 
+                                                    <span
+                                                        key={userId}
                                                         className="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-blue-700 transition-colors cursor-default"
                                                         title={`Assigned to: ${displayName}`}
                                                     >
@@ -390,8 +400,8 @@ function ChiefTasks() {
                                     {assignableMembers.length === 0 ? (
                                         <option value="" disabled>Select a project to see assignable members</option>
                                     ) : (
-                                        assignableMembers.map((member) => (
-                                            <option key={member._id} value={member._id}>{member.username}</option>
+                                        assignableMembers.map((member, index) => (
+                                            <option key={member._id || member.id || index} value={member._id || member.id}>{member.username || member.name}</option>
                                         ))
                                     )}
                                 </select>

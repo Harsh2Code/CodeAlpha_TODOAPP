@@ -1,9 +1,5 @@
-# TODO: Fix Sign-In JSON Parsing Error and Chief Projects Data Issue
+# TODO: Make Teams Page Visible to Chief
 
-## Steps to Complete:
-- [x] Update LoginUser thunk in authSlice.js to handle empty or invalid JSON responses gracefully
-- [x] Add try-catch around response.json() call
-- [x] Update config.js with correct backend deployed URL
-- [x] Update chiefProjects.jsx to use getBackendUrl() instead of VITE_APP_API_URL
-- [ ] Test the login functionality after changes
-- [ ] Test the chief projects page to ensure data loads correctly
+## Tasks
+- [x] Modify getTeams function in Main/Backend/Controllers/Chief/Teams.js to include teams where user is chief or leader
+- [ ] Test the change to ensure teams are fetched correctly

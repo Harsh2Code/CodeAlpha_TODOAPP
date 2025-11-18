@@ -22,12 +22,30 @@ exports.createProject = async (req, res) => {
 exports.getProjects = async (req, res) => {
     try {
         console.log('req.user.id in getProjects:', req.user.id);
-        const projects = await Project.find({ chief: req.user.id }).populate('tasks').populate('team');
+        const projects = await Project.find({ chief: req.user.id }).populate('tasks').populate({
+            path: 'team',
+            populate: {
+                path: 'members',
+                model: 'User',
+                select: 'username email role'
+            }
+        });
 
         const projectsWithCompletion = projects.map(project => {
             const totalTasks = project.tasks.length;
             const completedTasks = project.tasks.filter(task => task.status === 'completed').length;
             const completionPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+            // Transform team members to include 'name' field for frontend compatibility
+            if (project.team && project.team.members) {
+                project.team.members = project.team.members.map(member => ({
+                    id: member._id.toString(),
+                    name: member.username,
+                    email: member.email,
+                    role: member.role,
+                }));
+            }
+
             return {
                 ...project.toObject(), // Convert Mongoose document to plain object
                 completionPercentage: parseFloat(completionPercentage.toFixed(2)) // Format to 2 decimal places
